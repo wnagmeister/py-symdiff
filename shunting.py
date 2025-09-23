@@ -1,4 +1,4 @@
-def isnum(token):
+def isnum(token): # TODO: deleter this file? superseded?
     return token.isnumeric()
 
 

@@ -11,8 +11,6 @@ operator_precedence = [
     operators.get("+"),
 ]
 
-lst = [9, 8, 7]
-
 
 def precedence_ge(op1, op2):
     return operator_precedence.index(op1) >= operator_precedence.index(op2)
@@ -21,7 +19,7 @@ def precedence_ge(op1, op2):
 Operator.__ge__ = precedence_ge  # mypy: ignore
 
 
-def tokenify(string: str) -> Operand | Operator:
+def tokenify(string: str) -> Operand | Operator: # Operator | Scalar | Variable
     if string.lstrip("-").isnumeric():
         return Operand(float(string))
     elif operator := operators.get(string):
@@ -43,7 +41,7 @@ def shunting_yard(tokens: list[Operand | Operator]) -> list[Operand | Operator]:
 
     for token in tokens:
 
-        if isinstance(token, Operand):
+        if isinstance(token, Operand): # Variable or Scalar
             out_stack.append(token)
 
         elif isinstance(token, Operator):

@@ -35,7 +35,7 @@ class AstNode(TNode):
         return stack.pop()
 
     @classmethod
-    def astify_expr(cls, string: str, notation="r"):
+    def astify_expr(cls, string: str, notation="r") -> "AstNode":
         return cls.astify_rpn(string_to_tokens(string))
 
     @classmethod

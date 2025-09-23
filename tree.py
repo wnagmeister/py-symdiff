@@ -5,7 +5,7 @@ class TNode:
     def __init__(self, value, children: list):
         self.value = value
         self.children = children
-        self.no_of_children = len(children)
+        self.num_children = len(children)
 
     @classmethod
     def create_node(cls, value, children: list):
@@ -21,7 +21,7 @@ class TNode:
             return True
         return False
 
-    def no_of_child_leaves(self) -> int:
+    def no_of_child_leaves(self) -> int:    # Why is this a method?
         """counts the number of children which are leaves"""
         n = 0
         for child in self.children:
@@ -29,7 +29,7 @@ class TNode:
                 n += 1
         return n
 
-    def flatten(self, child) -> "TNode":
+    def flatten(self, child) -> "TNode": # Is this method even used?
         """removes the given child node and adds the children of the child
         directly to the children of self"""
         # assert the child is child of self
@@ -43,14 +43,14 @@ class TNode:
         if self.is_leaf():
             return 0
         else:
-            return max(child.height() for child in self.children) + 1
+            return max(child.height() for child in self.children) + 1 # Stack overflow possibility
 
     def _add_child(self, new_child):
         self.children.append(new_child)
-        self.no_of_children = len(self.children)
+        self.num_children = len(self.children)
 
     @staticmethod
-    def pad_para(para: str, char: str = " ") -> str:
+    def pad_para(para: str, char: str = " ") -> str:    # Tree printing methods should go outside class definition
         """left-pads every line in a multi-line string by nodewidth many char"""
         return "\n".join(
             [(TNode.nodewidth) * char + line for line in para.split(sep="\n")]
@@ -66,7 +66,7 @@ class TNode:
 
         lst = []
         for i, child in enumerate(self.children):
-            if i == self.no_of_children // 2:
+            if i == self.num_children // 2:
                 lst.append(TNode.make_branch(repr(self.value)))
             lst.append(TNode.pad_para(repr(child)))
         return "\n".join(lst)
