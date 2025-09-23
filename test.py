@@ -1,30 +1,21 @@
 from astree import AstNode
 
-h = 0.0001
-
-
-def derivative_at(func, x0):
-    return (func(x0 + h) - func(x0 - h)) / (2 * h)
-
-
-def test():
+def test1():
     expr = "x sq 3 x * + 5 -"  # x^2 + 3x - 5
     dexpr = "2 x * 3 +"  # 2x + 3
     ast = AstNode.astify(expr)
     dast1 = ast.derivative()
     dast2 = AstNode.astify(dexpr)
 
-    disreps = 0
-
-    for i in range(-100, 100):
+    h = 0.00001
+    for i in range(-10, 10):
+        a1 = ast.evaluate(i / 10)
+        a2 = (i/10)**2 + 3*(i/10)-5
+        assert a1 - a2 < h
+    for i in range(-10, 10):
         d1 = dast1.evaluate(i / 10)
         d2 = dast2.evaluate(i / 10)
-        print(d1 - d2)
-        if d1 - d2 != 0.0:
-            disreps += 1
-
-    print(disreps)
-
+        assert d1 - d2 < h
 
 def test2():
     X = AstNode.astify_const("x")
@@ -36,11 +27,19 @@ def test2():
 
     ast = c5 / X - n7 * X * Y
     dast = ast.derivative()
-    print(ast)
-    print(
-        "-----------------------------------------------------------------------------------------"
-    )
-    print(dast)
 
-test()
-test2()
+    h = 0.00001
+    for i in range(-10, 10):
+        if i == 0:
+            continue
+        a1 = ast.evaluate(i / 10)
+        x = i/10
+        a2 = 5 / x - (-7) * x * x 
+        assert a1 - a2 < h
+
+def main():
+    test1()
+    test2()
+
+if __name__ == "__main__":
+    main()
