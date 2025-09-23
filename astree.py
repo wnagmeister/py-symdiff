@@ -1,6 +1,6 @@
 from tree import TNode
-from symbols import Variable, Operand, Operator, operators
-from tokens import string_to_tokens
+from symbols import Variable, Operator, operators
+from tokens import string_to_tokens, Token
 
 
 class AstNode(TNode):
@@ -8,7 +8,7 @@ class AstNode(TNode):
     @classmethod
     def astify_rpn(
         cls,
-        tokens: list[Operand | Operator],
+        tokens: list[Token],
         *args: "AstNode",
         placeholder: Variable = Variable("{}"),
     ) -> "AstNode":
@@ -20,8 +20,8 @@ class AstNode(TNode):
         n: int = 0  # variable args counter
         stack: list[AstNode] = []
         for token in tokens:
-            if isinstance(token, Operand):
-                if token.is_optype(Variable) and token.opvalue.equals(placeholder):  # type: ignore
+            if isinstance(token, float | Variable):
+                if isinstance(token, Variable) and token == placeholder:
                     stack.append(args[n])
                     n += 1
                 else:
@@ -41,8 +41,8 @@ class AstNode(TNode):
     @classmethod
     def astify_const(cls, const: float | str) -> "AstNode":
         if isinstance(const, str):
-            return cls.nodify(Operand(Variable(const)))
-        return cls.nodify(Operand(const))
+            return cls.nodify((Variable(const)))
+        return cls.nodify((const))
 
     @classmethod
     def astify_format(cls, string: str, *args):
@@ -117,12 +117,12 @@ class AstNode(TNode):
         elif self.value == operators.get("/"):
             return diff_div(self)
 
-        return self.nodify(Operand(0))
+        return self.nodify(0)
 
     def derivative(self, wrt: Variable = Variable("x")) -> "AstNode":
 
         if self.is_leaf():
-            if self.value.is_optype(Variable) and self.value.opvalue.equals(wrt):
+            if isinstance(self.value, Variable) and self.value == wrt:
                 return self.__class__.astify_const(1)
             return self.__class__.astify_const(0)
 
@@ -140,9 +140,8 @@ class AstNode(TNode):
                 case "+":
                     for i, child in enumerate(self.children):
                         if (
-                            isinstance(child.value, Operand)
-                            and not child.value.is_optype(Variable)
-                            and child.value.opvalue == 0
+                            isinstance(child.value, float)
+                            and child.value == 0
                         ):
                             if i == 0:
                                 return self.children[1]
@@ -151,9 +150,8 @@ class AstNode(TNode):
                 case "-":
                     for i, child in enumerate(self.children):
                         if (
-                            isinstance(child.value, Operand)
-                            and not child.value.is_optype(Variable)
-                            and child.value.opvalue == 0
+                            isinstance(child.value, float)
+                            and child.value == 0
                         ):
                             if i == 0:
                                 return self.__class__.astify_format(
@@ -164,17 +162,15 @@ class AstNode(TNode):
                 case "*":
                     for child in self.children:
                         if (
-                            isinstance(child.value, Operand)
-                            and not child.value.is_optype(Variable)
-                            and child.value.opvalue == 0
+                            isinstance(child.value, float)
+                            and child.value == 0
                         ):
                             return self.__class__.astify_const(0)
 
                     for i, child in enumerate(self.children):
                         if (
-                            isinstance(child.value, Operand)
-                            and not child.value.is_optype(Variable)
-                            and child.value.opvalue == 1
+                            isinstance(child.value, float)
+                            and child.value == 1
                         ):
                             if i == 0:
                                 return self.children[1]
@@ -184,9 +180,8 @@ class AstNode(TNode):
                 case "/":
                     numerator = self.children[0]
                     if (
-                        isinstance(numerator.value, Operand)
-                        and not numerator.value.is_optype(Variable)
-                        and numerator.value.opvalue == 0
+                        isinstance(numerator.value, float)
+                        and numerator.value == 1
                     ):
                         return self.__class__.astify_const(0)
         return self.__class__.create_node(
