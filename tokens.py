@@ -19,7 +19,7 @@ def precedence_ge(op1, op2):
 Operator.__ge__ = precedence_ge  # mypy: ignore
 
 
-type Token = float | Operator | Variable 
+type Token = float | Operator | Variable
 type Operand = float | Variable
 
 

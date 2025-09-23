@@ -1,9 +1,9 @@
-from tree import TNode
+from tree import Node
 from symbols import Variable, Operator, operators
 from tokens import string_to_tokens, Token
 
 
-class AstNode(TNode):
+class AstNode(Node):
 
     @classmethod
     def astify_rpn(
@@ -25,7 +25,7 @@ class AstNode(TNode):
                     stack.append(args[n])
                     n += 1
                 else:
-                    stack.append(cls.nodify(token))
+                    stack.append(cls.leafify(token))
 
             elif isinstance(token, Operator):
                 children = [stack.pop() for i in range(token.arity)]
@@ -41,8 +41,8 @@ class AstNode(TNode):
     @classmethod
     def astify_const(cls, const: float | str) -> "AstNode":
         if isinstance(const, str):
-            return cls.nodify((Variable(const)))
-        return cls.nodify((const))
+            return cls.leafify((Variable(const)))
+        return cls.leafify((const))
 
     @classmethod
     def astify_format(cls, string: str, *args):
@@ -86,14 +86,14 @@ class AstNode(TNode):
     def evaluate(self, x: float) -> float:
         """evaluates the AST, sets all variables to x"""
         if self.is_leaf():
-            if self.value.is_optype(Variable):
+            if isinstance(self.value, Variable):
                 return x
-            return self.value.opvalue
+            return self.value
         return self.value.func(*([child.evaluate(x) for child in self.children]))
 
     def eval2(self, x: float, var=Variable("x")) -> "AstNode":
         """sets all appearances of var x to value x"""
-        if self.value.is_optype(Variable) and self.value.opvalue.equals(var):
+        if self.value.is_optype(Variable) and self.value.opvalue.equals(var): # remove optype
             return self.astify_const(x)
         return self.__class__.create_node(
             self.value, [self.eval2(x, var=var) for child in self.children]
@@ -102,22 +102,6 @@ class AstNode(TNode):
     def simplify_const(self):
         """simplify constant expressions: 1 2 + -> 3"""
         pass
-
-    def _diff_depr(self, wrt: Variable = Variable("x")) -> "AstNode":
-
-        if self.is_leaf():
-            if self.value.is_optype(Variable) and self.value.opvalue.equals(wrt):
-                return self.astify_const(1)
-            return self.astify_const(0)
-
-        if self.value == operators.get("+"):
-            return diff_add(self)
-        elif self.value == operators.get("*"):
-            return diff_mult(self)
-        elif self.value == operators.get("/"):
-            return diff_div(self)
-
-        return self.nodify(0)
 
     def derivative(self, wrt: Variable = Variable("x")) -> "AstNode":
 
@@ -139,20 +123,14 @@ class AstNode(TNode):
             match self.value.string:
                 case "+":
                     for i, child in enumerate(self.children):
-                        if (
-                            isinstance(child.value, float)
-                            and child.value == 0
-                        ):
+                        if isinstance(child.value, float) and child.value == 0:
                             if i == 0:
                                 return self.children[1]
                             if i == 1:
                                 return self.children[0]
                 case "-":
                     for i, child in enumerate(self.children):
-                        if (
-                            isinstance(child.value, float)
-                            and child.value == 0
-                        ):
+                        if isinstance(child.value, float) and child.value == 0:
                             if i == 0:
                                 return self.__class__.astify_format(
                                     "-1 {} *", self.children[1]
@@ -161,17 +139,11 @@ class AstNode(TNode):
                                 return self.children[0]
                 case "*":
                     for child in self.children:
-                        if (
-                            isinstance(child.value, float)
-                            and child.value == 0
-                        ):
+                        if isinstance(child.value, float) and child.value == 0:
                             return self.__class__.astify_const(0)
 
                     for i, child in enumerate(self.children):
-                        if (
-                            isinstance(child.value, float)
-                            and child.value == 1
-                        ):
+                        if isinstance(child.value, float) and child.value == 1:
                             if i == 0:
                                 return self.children[1]
                             if i == 1:
@@ -179,10 +151,7 @@ class AstNode(TNode):
 
                 case "/":
                     numerator = self.children[0]
-                    if (
-                        isinstance(numerator.value, float)
-                        and numerator.value == 1
-                    ):
+                    if isinstance(numerator.value, float) and numerator.value == 1:
                         return self.__class__.astify_const(0)
         return self.__class__.create_node(
             self.value, [child.prune() for child in self.children]
@@ -198,10 +167,10 @@ class AstNode(TNode):
         format_str = " ".join(format_tokens)
 
         """retrieves indices of substitution nodes in diff string, indices >= 0
-        so we invert them across i=-0.5 to indicate that the node should be
+        so we invert them across i=-0.5 to indicate that the node should be # inverting across -0.5 because placeholders are 0-based is crazy
         differentiated"""
-        child_tokens = [token for token in str_tokens if token[0] == "#"]
-        child_nodes = [
+        child_tokens = [token for token in str_tokens if token[0] == "#"]   # this is just stupid
+        child_nodes = [                                                     # TODO: implement proper tree substitution
             -int(token[2:]) - 1 if (token[1] == "#") else int(token[1:])
             for token in child_tokens
         ]

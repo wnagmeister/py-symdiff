@@ -1,5 +1,6 @@
 import math
 
+
 class Variable:
     def __init__(self, string):
         self.string = string
@@ -24,8 +25,8 @@ class Operator:
     def is_op(self, string):
         return self.string == string
 
-    def __eq__(self, other_op): # TODO: Use this not above
-        return self.string == other_op.string 
+    def __eq__(self, other_op):  # TODO: Use this not above
+        return self.string == other_op.string
 
     def __repr__(self):
         return self.string

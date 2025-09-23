@@ -1,4 +1,4 @@
-class TNode:
+class Node:
 
     nodewidth = 5
 
@@ -12,7 +12,7 @@ class TNode:
         return cls(value, children)
 
     @classmethod
-    def nodify(cls, value):
+    def leafify(cls, value):
         """Returns a leaf node with value value and no children"""
         return cls(value, [])
 
@@ -21,7 +21,7 @@ class TNode:
             return True
         return False
 
-    def no_of_child_leaves(self) -> int:    # Why is this a method?
+    def no_of_child_leaves(self) -> int:  # Why is this a method?
         """counts the number of children which are leaves"""
         n = 0
         for child in self.children:
@@ -29,7 +29,7 @@ class TNode:
                 n += 1
         return n
 
-    def flatten(self, child) -> "TNode": # Is this method even used?
+    def flatten(self, child) -> "TNode":  # Is this method even used?
         """removes the given child node and adds the children of the child
         directly to the children of self"""
         # assert the child is child of self
@@ -43,32 +43,36 @@ class TNode:
         if self.is_leaf():
             return 0
         else:
-            return max(child.height() for child in self.children) + 1 # Stack overflow possibility
+            return (
+                max(child.height() for child in self.children) + 1
+            )  # Stack overflow possibility
 
     def _add_child(self, new_child):
         self.children.append(new_child)
         self.num_children = len(self.children)
 
     @staticmethod
-    def pad_para(para: str, char: str = " ") -> str:    # Tree printing methods should go outside class definition
+    def pad_para(
+        para: str, char: str = " "
+    ) -> str:  # Tree printing methods should go outside class definition
         """left-pads every line in a multi-line string by nodewidth many char"""
         return "\n".join(
-            [(TNode.nodewidth) * char + line for line in para.split(sep="\n")]
+            [(Node.nodewidth) * char + line for line in para.split(sep="\n")]
         )
 
     @staticmethod
     def make_branch(string: str) -> str:
-        return "|" + string.rjust(TNode.nodewidth, "-")
+        return "|" + string.rjust(Node.nodewidth, "-")
 
     def __repr__(self):
         if self.is_leaf():
-            return TNode.make_branch(repr(self.value))
+            return Node.make_branch(repr(self.value))
 
         lst = []
         for i, child in enumerate(self.children):
             if i == self.num_children // 2:
-                lst.append(TNode.make_branch(repr(self.value)))
-            lst.append(TNode.pad_para(repr(child)))
+                lst.append(Node.make_branch(repr(self.value)))
+            lst.append(Node.pad_para(repr(child)))
         return "\n".join(lst)
 
 
