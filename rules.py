@@ -1,4 +1,4 @@
-from symbols import Variable
+from symbols import Variable, Operator
 from astree import AstNode
 
 
@@ -25,8 +25,12 @@ class Rule:
         return expr
 
     def apply2(self, expr: AstNode) -> AstNode:
-        for sub_expr, parent in expr:
-            return self.apply(sub_expr)
+        for sub_expr in expr:
+            for i, child in enumerate(sub_expr.children):
+                new_expr = self.apply(child)
+                sub_expr.children[i] = new_expr
+
+        return expr
 
 
 add_0_rule = Rule(AstNode.astify_expr("f 0 +"), AstNode.astify_expr("f"))
@@ -50,7 +54,7 @@ def is_match(
                 return True
 
         case _:  # Operator()
-            if expr.value != pattern.value:
+            if not isinstance(expr.value, Operator) or expr.value != pattern.value:
                 return False
             else:
                 for expr_child, pattern_child in zip(expr.children, pattern.children):

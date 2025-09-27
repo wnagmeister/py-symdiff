@@ -69,10 +69,20 @@ class Node:
             if each_child == child:
                 self.children[i] = replacement
 
+    def traverse(self):
+        """Traverses over the subnodes in postorder"""
+        for child in self.children:
+            yield from child.traverse()
+        yield self
+
+    def __iter__(self):
+        """Iterates over the subnodes in postorder"""
+        return self.traverse()
+
+    "Tree printing methods" ""
+
     @staticmethod
-    def pad_para(
-        para: str, char: str = " "
-    ) -> str:  # Tree printing methods should go outside class definition
+    def pad_para(para: str, char: str = " ") -> str:
         """left-pads every line in a multi-line string by nodewidth many char"""
         return "\n".join(
             [(Node.nodewidth) * char + line for line in para.split(sep="\n")]
