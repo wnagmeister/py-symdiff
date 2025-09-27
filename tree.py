@@ -64,6 +64,11 @@ class Node:
                     return False
             return True
 
+    def substitute(self, child: "Node", replacement: "Node") -> None:
+        for i, each_child in enumerate(self.children):
+            if each_child == child:
+                self.children[i] = replacement
+
     @staticmethod
     def pad_para(
         para: str, char: str = " "

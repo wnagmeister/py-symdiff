@@ -1,5 +1,6 @@
 from astree import AstNode
 
+
 def test1():
     expr = "x sq 3 x * + 5 -"  # x^2 + 3x - 5
     dexpr = "2 x * 3 +"  # 2x + 3
@@ -10,12 +11,13 @@ def test1():
     h = 0.00001
     for i in range(-10, 10):
         a1 = ast.evaluate(i / 10)
-        a2 = (i/10)**2 + 3*(i/10)-5
+        a2 = (i / 10) ** 2 + 3 * (i / 10) - 5
         assert a1 - a2 < h
     for i in range(-10, 10):
         d1 = dast1.evaluate(i / 10)
         d2 = dast2.evaluate(i / 10)
         assert d1 - d2 < h
+
 
 def test2():
     X = AstNode.astify_const("x")
@@ -33,13 +35,15 @@ def test2():
         if i == 0:
             continue
         a1 = ast.evaluate(i / 10)
-        x = i/10
-        a2 = 5 / x - (-7) * x * x 
+        x = i / 10
+        a2 = 5 / x - (-7) * x * x
         assert a1 - a2 < h
+
 
 def main():
     test1()
     test2()
+
 
 if __name__ == "__main__":
     main()

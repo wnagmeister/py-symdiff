@@ -16,8 +16,7 @@ def precedence_ge(op1, op2):
     return operator_precedence.index(op1) >= operator_precedence.index(op2)
 
 
-Operator.__ge__ = precedence_ge  # mypy: ignore
-
+Operator.__ge__ = precedence_ge  # pylint: ignore
 
 type Token = float | Operator | Variable
 type Operand = float | Variable

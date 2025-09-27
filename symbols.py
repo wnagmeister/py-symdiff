@@ -14,6 +14,9 @@ class Variable:
     def __repr__(self):
         return self.string
 
+    def __hash__(self):
+        return hash(self.string)
+
 
 class Operator:
     def __init__(self, string: str, arity: int, func, diff):

@@ -1,5 +1,5 @@
 from tree import Node
-from symbols import Variable, Operator, operators
+from symbols import Variable, Operator
 from tokens import string_to_tokens, Token
 
 
@@ -93,7 +93,9 @@ class AstNode(Node):
 
     def eval2(self, x: float, var=Variable("x")) -> "AstNode":
         """sets all appearances of var x to value x"""
-        if self.value.is_optype(Variable) and self.value.opvalue.equals(var): # remove optype
+        if self.value.is_optype(Variable) and self.value.opvalue.equals(
+            var
+        ):  # remove optype
             return self.astify_const(x)
         return self.__class__.create_node(
             self.value, [self.eval2(x, var=var) for child in self.children]
@@ -101,7 +103,6 @@ class AstNode(Node):
 
     def simplify_const(self):
         """simplify constant expressions: 1 2 + -> 3"""
-        pass
 
     def derivative(self, wrt: Variable = Variable("x")) -> "AstNode":
 
@@ -169,8 +170,10 @@ class AstNode(Node):
         """retrieves indices of substitution nodes in diff string, indices >= 0
         so we invert them across i=-0.5 to indicate that the node should be # inverting across -0.5 because placeholders are 0-based is crazy
         differentiated"""
-        child_tokens = [token for token in str_tokens if token[0] == "#"]   # this is just stupid
-        child_nodes = [                                                     # TODO: implement proper tree substitution
+        child_tokens = [
+            token for token in str_tokens if token[0] == "#"
+        ]  # this is just stupid
+        child_nodes = [  # TODO: implement proper tree substitution
             -int(token[2:]) - 1 if (token[1] == "#") else int(token[1:])
             for token in child_tokens
         ]
@@ -190,6 +193,18 @@ class AstNode(Node):
             )
 
         return diff_op
+
+    def copy(self) -> "AstNode":
+        """Copies the tree. Creates new instances of any variable objects in the tree, but retains the existing operator instances."""
+        cls = type(self)
+        match self.value:
+            case float():
+                return cls.leafify(self.value)
+            case Variable():
+                return cls.leafify(Variable(self.value.string))
+            case _:  # Operator()
+                children = [child.copy() for child in self.children]
+                return cls.create_node(self.value, children)
 
 
 if __name__ == "__main__":
