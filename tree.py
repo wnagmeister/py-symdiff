@@ -16,7 +16,7 @@ class Node:
         """Returns a leaf node with value value and no children"""
         return cls(value, [])
 
-    def is_leaf(self):
+    def is_leaf(self) -> bool:
         if not self.children:
             return True
         return False
@@ -29,7 +29,7 @@ class Node:
                 n += 1
         return n
 
-    def flatten(self, child) -> "TNode":  # Is this method even used?
+    def flatten(self, child) -> "Node":  # Is this method even used?
         """removes the given child node and adds the children of the child
         directly to the children of self"""
         # assert the child is child of self
@@ -50,6 +50,19 @@ class Node:
     def _add_child(self, new_child):
         self.children.append(new_child)
         self.num_children = len(self.children)
+
+    def is_equal(self, other: "Node", compare) -> bool:
+        if self.is_leaf() ^ other.is_leaf():
+            return False
+        elif self.num_children != other.num_children:
+            return False
+        elif not compare(self.value, other.value):
+            return False
+        else:
+            for self_child, other_child in zip(self.children, other.children):
+                if not self_child.is_equal(other_child, compare):
+                    return False
+            return True
 
     @staticmethod
     def pad_para(
