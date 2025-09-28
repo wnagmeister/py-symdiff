@@ -1,11 +1,23 @@
-from rules import add_0_rule, mult_0_rule
+from rules import apply_all_rules
 from astree import AstNode
+from symbols import operators
 
-expr = AstNode.astify_expr("y 0 *")
+expr = AstNode.astify_expr("1 0 * 4 + 0 x + 0 * +")
 print(expr)
-simplified = mult_0_rule.apply2(expr)
+apply_all_rules(expr)
+print("\n")
+print(expr)
 print("\n\n")
-print(simplified)
-simplified = add_0_rule.apply2(simplified)
+
+expr2 = AstNode.astify_expr("x 2 x * D")
+print(expr2)
+apply_all_rules(expr2)
+print("\n")
+print(expr2)
 print("\n\n")
-print(simplified)
+
+expr3 = AstNode.astify_expr("x 2 x * exp D")
+print(expr3)
+apply_all_rules(expr3)
+print("\n\n\n")
+print(expr3)

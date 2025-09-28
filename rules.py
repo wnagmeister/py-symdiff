@@ -3,8 +3,8 @@ from astree import AstNode
 
 
 class Rule:
-
-    def __init__(self, pattern: AstNode, replacement: AstNode):
+    def __init__(self, name: str, pattern: AstNode, replacement: AstNode):
+        self.name = name
         self.pattern = pattern
         self.replacement = replacement
 
@@ -16,44 +16,89 @@ class Rule:
     # replacements and searches.
     # or does it work??? once a node is subbed in, its skipped
 
-    def apply(self, expr: AstNode) -> AstNode:
+    def apply(self, expr: AstNode) -> bool:
+        """Applies the rule in place onto the expression expr if possible.
+        Applies it to the whole of expr; it does not apply it to
+        subexpressions. At the end, returns True if expr was modified, False if
+        not.
+        """
         bindings: dict[Variable, AstNode] = {}
         if is_match(expr, self.pattern, bindings):
             replacement: AstNode = self.replacement.copy()
             substitute(replacement, bindings)
-            return replacement
-        return expr
+            expr.value = replacement.value
+            expr.children = replacement.children
+            return True
+        else:
+            return False
 
-    def apply2(self, expr: AstNode) -> AstNode:
+    def apply_recursive(self, expr: AstNode) -> bool:
+        changed: bool = False
         for sub_expr in expr:
-            for i, child in enumerate(sub_expr.children):
-                new_expr = self.apply(child)
-                sub_expr.children[i] = new_expr
-
-        return expr
+            changed = changed or self.apply(sub_expr)
+        return changed
 
 
-add_0_rule = Rule(AstNode.astify_expr("f 0 +"), AstNode.astify_expr("f"))
-mult_0_rule = Rule(AstNode.astify_expr("f 0 *"), AstNode.astify_expr("0"))
+rules: set[Rule] = {
+    Rule("Add 0 1", AstNode.astify_expr("f 0 +"), AstNode.astify_expr("f")),
+    Rule("Add 0 2", AstNode.astify_expr("0 f +"), AstNode.astify_expr("f")),
+    Rule("Multiply 0 1", AstNode.astify_expr("f 0 *"), AstNode.astify_expr("0")),
+    Rule("Multiply 0 2", AstNode.astify_expr("0 f *"), AstNode.astify_expr("0")),
+    Rule("Multiply 1 1", AstNode.astify_expr("f 1 *"), AstNode.astify_expr("f")),
+    Rule("Multiple 1 2", AstNode.astify_expr("1 f *"), AstNode.astify_expr("f")),
+    Rule("x + x = 2x", AstNode.astify_expr("f f +"), AstNode.astify_expr("2 f *")),
+    Rule(
+        "Derivative w.r.t itself",
+        AstNode.astify_expr("f f D"),
+        AstNode.astify_expr("1"),
+    ),
+    Rule(
+        "Product rule",
+        AstNode.astify_expr("x f g * D"),
+        AstNode.astify_expr("x f D g * f x g D * +"),
+    ),
+    Rule(
+        "Derivative of exp",
+        AstNode.astify_expr("x f exp D"),
+        AstNode.astify_expr("f exp x f D *"),
+    ),
+}
+
+
+def apply_all_rules(expr: AstNode) -> None:
+    prev_changed: bool = False
+    while True:
+        changed: bool = False
+        for rule in rules:
+            changed = changed or rule.apply_recursive(expr)
+        if not prev_changed and not changed:
+            break
+        else:
+            prev_changed = changed
 
 
 def is_match(
     expr: AstNode, pattern: AstNode, bindings: dict[Variable, AstNode]
-) -> bool:  # Unlike in C, the node is never null
+) -> bool:
+    """Checks if expr matches the pattern given. All variables in
+    pattern are wildcards which can be bound to any subexpression.
+    Will only return True if the entire expression matches the pattern;
+    it will not match subexpressions of expr to the pattern.
+    """
     match pattern.value:
         case float():
             return expr.value == pattern.value
 
         case Variable():
-            if existing_binding := bindings.get(
-                pattern.value
-            ):  # if binding exists, check if expr equals the already bound expression
+            if existing_binding := bindings.get(pattern.value):
+                # If a variable is bound, check if the bound expression is the
+                # same as the currently matched expression
                 return expr.is_equal(existing_binding, lambda x, y: x == y)
-            else:  # If not, set new binding
+            else:
                 bindings[pattern.value] = expr
                 return True
 
-        case _:  # Operator()
+        case _:  # case: Operator()
             if not isinstance(expr.value, Operator) or expr.value != pattern.value:
                 return False
             else:
@@ -64,7 +109,9 @@ def is_match(
 
 
 def substitute(expr: AstNode, bindings: dict[Variable, AstNode]) -> None:
-    """Substitutes variables in expr in place  according to the bindings given."""
+    """Substitutes variables in expr in place according to the bindings
+    given.
+    """
     if expr.is_leaf() and (binding := bindings.get(expr.value)):
         expr.value = binding.value
         expr.children = binding.children
