@@ -122,3 +122,7 @@ def substitute(expr: AstNode, bindings: dict[Variable, AstNode]) -> None:
                     expr.children[i] = binding
             else:
                 substitute(child, bindings)
+
+
+if __name__ == "__main__":
+    pass
