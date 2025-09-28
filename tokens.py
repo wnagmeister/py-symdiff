@@ -4,16 +4,12 @@ operators["("] = Operator("(", 0, None, None)
 operators[")"] = Operator(")", 0, None, None)
 
 
-operator_precedence = [
-    operators.get("/"),
-    operators.get("*"),
-    operators.get("-"),
-    operators.get("+"),
-]
-
-
 def precedence_ge(op1, op2):
-    return operator_precedence.index(op1) >= operator_precedence.index(op2)
+    for key in operators:
+        if key == op1:
+            return -1
+        if key == op2:
+            return 1
 
 
 Operator.__ge__ = precedence_ge  # pylint: ignore
