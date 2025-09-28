@@ -1,7 +1,7 @@
 from symbols import Variable, Operator, operators
 
-operators["("] = Operator("(", 0, None)
-operators[")"] = Operator(")", 0, None)
+operators["("] = Operator("(", 0, 0, "", None)
+operators[")"] = Operator(")", 0, 0, "", None)
 
 
 def precedence_ge(op1, op2):
@@ -11,8 +11,6 @@ def precedence_ge(op1, op2):
         if key == op2:
             return 1
 
-
-Operator.__ge__ = precedence_ge  # pylint: ignore
 
 type Token = float | Operator | Variable
 type Operand = float | Variable

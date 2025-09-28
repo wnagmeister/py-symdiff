@@ -22,9 +22,13 @@ class Variable:
 
 
 class Operator:
-    def __init__(self, string: str, arity: int, func):
+    def __init__(
+        self, string: str, arity: int, precedence: int, associativity: str, func
+    ):
         self.string = string
         self.arity = arity
+        self.precedence = precedence
+        self.associativity = associativity
         self.func = func
 
     def is_op(self, string):
@@ -36,22 +40,24 @@ class Operator:
         else:
             return False
 
+    def __ge__(self, other) -> bool:
+        return self.precedence >= other.precedence
+
     def __repr__(self):
         return self.string
 
 
-"""Dictionary of operators, ordered from lowest precedence to highest."""
 operators = {
-    "+": Operator("+", 2, lambda x, y: x + y),
-    "-": Operator("-", 2, lambda x, y: x - y),
-    "*": Operator("*", 2, lambda x, y: x * y),
-    "/": Operator("/", 2, lambda x, y: x / y),
-    "sq": Operator("sq", 1, lambda x: x * x),
-    "exp": Operator("exp", 1, math.exp),
-    "sin": Operator("sin", 1, math.sin),
-    "cos": Operator("cos", 1, math.cos),
-    "ln": Operator("ln", 1, math.log),
-    "D": Operator("D", 2, None),
+    "+": Operator("+", 2, 1, "left", lambda x, y: x + y),
+    "-": Operator("-", 2, 1, "left", lambda x, y: x - y),
+    "*": Operator("*", 2, 2, "left", lambda x, y: x * y),
+    "/": Operator("/", 2, 2, "left", lambda x, y: x / y),
+    "sq": Operator("sq", 1, 3, "right", lambda x: x * x),
+    "exp": Operator("exp", 1, 3, "right", math.exp),
+    "sin": Operator("sin", 1, 3, "right", math.sin),
+    "cos": Operator("cos", 1, 3, "right", math.cos),
+    "ln": Operator("ln", 1, 3, "right", math.log),
+    "D": Operator("D", 2, 4, "left", None),
 }
 
 if __name__ == "__main__":
