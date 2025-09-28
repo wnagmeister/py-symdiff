@@ -5,8 +5,11 @@ class Variable:
     def __init__(self, string):
         self.string = string
 
-    def __eq__(self, other_var):
-        return self.string == other_var.string
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Variable):
+            return self.string == other.string
+        else:
+            return False
 
     def evaluate(self, x):
         return x
@@ -28,13 +31,17 @@ class Operator:
     def is_op(self, string):
         return self.string == string
 
-    def __eq__(self, other_op):  # TODO: Use this not above
-        return self.string == other_op.string
+    def __eq__(self, other) -> bool:  # TODO: Use this not above
+        if isinstance(other, Operator):
+            return self.string == other.string
+        else:
+            return False
 
     def __repr__(self):
         return self.string
 
 
+"""Dictionary of operators, ordered from lowest precedence to highest."""
 operators = {
     "+": Operator("+", 2, lambda x, y: x + y, "##0 ##1 +"),
     "-": Operator("-", 2, lambda x, y: x - y, "##0 ##1 -"),
@@ -45,6 +52,7 @@ operators = {
     "sin": Operator("sin", 1, math.sin, "##0 #0 cos *"),
     "cos": Operator("cos", 1, math.cos, "##0 #0 sin * -1 *"),
     "ln": Operator("ln", 1, math.log, "##0 #0 /"),
+    "D": Operator("D", 2, None, ""),
 }
 
 if __name__ == "__main__":
