@@ -29,16 +29,6 @@ class Node:
                 n += 1
         return n
 
-    def flatten(self, child) -> "Node":  # Is this method even used?
-        """removes the given child node and adds the children of the child
-        directly to the children of self"""
-        # assert the child is child of self
-        # i can FEEL the mutability problems
-        new_children = [
-            other for other in self.children if other != child
-        ] + child.children
-        return self.__class__.create_node(self.value, new_children)
-
     def height(self) -> int:
         if self.is_leaf():
             return 0
@@ -46,10 +36,6 @@ class Node:
             return (
                 max(child.height() for child in self.children) + 1
             )  # Stack overflow possibility
-
-    def _add_child(self, new_child):
-        self.children.append(new_child)
-        self.num_children = len(self.children)
 
     def is_equal(self, other: "Node", compare) -> bool:
         if self.is_leaf() ^ other.is_leaf():
@@ -79,7 +65,7 @@ class Node:
         """Iterates over the subnodes in postorder"""
         return self.traverse()
 
-    "Tree printing methods" ""
+    """"Tree printing methods"""
 
     @staticmethod
     def pad_para(para: str, char: str = " ") -> str:
