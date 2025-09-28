@@ -1,7 +1,7 @@
 from symbols import Variable, Operator, operators
 
-operators["("] = Operator("(", 0, None, None)
-operators[")"] = Operator(")", 0, None, None)
+operators["("] = Operator("(", 0, None)
+operators[")"] = Operator(")", 0, None)
 
 
 def precedence_ge(op1, op2):

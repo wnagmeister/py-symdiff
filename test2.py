@@ -21,3 +21,7 @@ print(expr3)
 apply_all_rules(expr3)
 print("\n\n\n")
 print(expr3)
+
+expr4 = AstNode.astify_expr("y y +")
+apply_all_rules(expr4)
+print(expr4)
