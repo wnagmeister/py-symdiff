@@ -8,7 +8,7 @@ class Node:
         self.num_children = len(children)
 
     @classmethod
-    def create_node(cls, value, children: list):
+    def join(cls, value, children: list):
         return cls(value, children)
 
     @classmethod
@@ -20,14 +20,6 @@ class Node:
         if not self.children:
             return True
         return False
-
-    def no_of_child_leaves(self) -> int:  # Why is this a method?
-        """counts the number of children which are leaves"""
-        n = 0
-        for child in self.children:
-            if child.is_leaf():
-                n += 1
-        return n
 
     def height(self) -> int:
         if self.is_leaf():

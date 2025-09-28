@@ -19,7 +19,7 @@ class AstNode(Node):
             elif isinstance(token, Operator):
                 children = [stack.pop() for i in range(token.arity)]
                 children.reverse()
-                new_node = cls.create_node(token, children)
+                new_node = cls.join(token, children)
                 stack.append(new_node)
         return stack.pop()
 
@@ -28,33 +28,29 @@ class AstNode(Node):
         return cls.astify_rpn(string_to_tokens(string))
 
     @classmethod
-    def astify_const(cls, const: float | str) -> "AstNode":
-        if isinstance(const, str):
-            return cls.leafify((Variable(const)))
-        return cls.leafify((const))
-
-    @classmethod
     def astify(cls, obj: str | float) -> "AstNode":
+        """Takes a string expression in infix notation and returns the
+        abstract syntax tree."""
         if isinstance(obj, str):
             return cls.astify_rpn(shunting_yard(string_to_tokens(obj)))
         else:
-            return cls.astify_const(obj)
+            return cls.leafify(obj)
 
     # overloading operators to make making new ASTs easier
     def __add__(self, other: "AstNode") -> "AstNode":
-        return self.__class__.create_node(operators.get("+"), [self, other])
+        return self.__class__.join(operators.get("+"), [self, other])
 
     def __mul__(self, other: "AstNode") -> "AstNode":
-        return self.__class__.create_node(operators.get("*"), [self, other])
+        return self.__class__.join(operators.get("*"), [self, other])
 
     def __sub__(self, other: "AstNode") -> "AstNode":
-        return self.__class__.create_node(operators.get("-"), [self, other])
+        return self.__class__.join(operators.get("-"), [self, other])
 
     def __truediv__(self, other: "AstNode") -> "AstNode":
-        return self.__class__.create_node(operators.get("/"), [self, other])
+        return self.__class__.join(operators.get("/"), [self, other])
 
     def __pow__(self, other: "AstNode") -> "AstNode":
-        return self.__class__.create_node(operators.get("^"), [self, other])
+        return self.__class__.join(operators.get("^"), [self, other])
 
     def copy(self) -> "AstNode":
         """Copies the tree. Creates new instances of any variable
@@ -69,7 +65,7 @@ class AstNode(Node):
             # Operator
             case _:
                 children = [child.copy() for child in self.children]
-                return cls.create_node(self.value, children)
+                return cls.join(self.value, children)
 
 
 if __name__ == "__main__":

@@ -40,18 +40,14 @@ class Rule:
 
 
 rules: set[Rule] = {
-    Rule("Add 0 1", AstNode.astify_expr("f 0 +"), AstNode.astify_expr("f")),
-    Rule("Add 0 2", AstNode.astify_expr("0 f +"), AstNode.astify_expr("f")),
-    Rule("Multiply 0 1", AstNode.astify_expr("f 0 *"), AstNode.astify_expr("0")),
-    Rule("Multiply 0 2", AstNode.astify_expr("0 f *"), AstNode.astify_expr("0")),
-    Rule("Multiply 1 1", AstNode.astify_expr("f 1 *"), AstNode.astify_expr("f")),
-    Rule("Multiple 1 2", AstNode.astify_expr("1 f *"), AstNode.astify_expr("f")),
-    Rule("x + x = 2x", AstNode.astify_expr("f f +"), AstNode.astify_expr("2 f *")),
-    Rule(
-        "Derivative w.r.t itself",
-        AstNode.astify_expr("f f D"),
-        AstNode.astify_expr("1"),
-    ),
+    Rule("Add 0 1", AstNode.astify("f + 0"), AstNode.astify("f")),
+    Rule("Add 0 2", AstNode.astify("0 + f"), AstNode.astify("f")),
+    Rule("Multiply 0 1", AstNode.astify("f * 0"), AstNode.astify("0")),
+    Rule("Multiply 0 2", AstNode.astify("0 * f"), AstNode.astify("0")),
+    Rule("Multiply 1 1", AstNode.astify("f * 1"), AstNode.astify("f")),
+    Rule("Multiply 1 2", AstNode.astify("1 * f"), AstNode.astify("f")),
+    Rule("x + x = 2x", AstNode.astify("f + f"), AstNode.astify("2 * f")),
+    Rule("Derivative w.r.t itself", AstNode.astify("f D f"), AstNode.astify("1")),
     Rule(
         "Product rule",
         AstNode.astify_expr("x f g * D"),
