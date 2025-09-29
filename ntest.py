@@ -2,7 +2,7 @@ from rules import (
     normalise,
     subtraction_removal,
     flatten,
-    flatten2,
+    flatten_recursive,
     sort_commutative,
 )
 from astree import AstNode
@@ -12,7 +12,7 @@ print(expr)
 print("\n")
 breakpoint()
 subtraction_removal.apply_recursive(expr)
-flatten2(expr)
+flatten_recursive(expr)
 print(expr)
 print("\n")
 sort_commutative(expr)

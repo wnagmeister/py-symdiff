@@ -131,8 +131,9 @@ rules: set[Rule] = {
 
 def normalise(expr: AstNode):
     subtraction_removal.apply_recursive(expr)
-    flatten2(expr)
+    flatten_recursive(expr)
     sort_commutative(expr)
+    apply_identities(expr)
 
 
 subtraction_removal: Rule = Rule(
@@ -159,7 +160,7 @@ def flatten(expr: AstNode) -> bool:
     return flattened
 
 
-def flatten2(expr: AstNode) -> bool:
+def flatten_recursive(expr: AstNode) -> bool:
     """Recursively flattens any operators in expr with any immediate children if
     possible."""
     flattened: bool = False
@@ -184,7 +185,7 @@ def sort_commutative(expr: AstNode) -> None:
             sub_expr.children.sort(key=expr_sort_key)
 
 
-def additive_identity(expr: AstNode) -> None:
+def additive_identity(expr: AstNode) -> bool:
     for sub_expr in expr:
         if sub_expr.value == operators.get("+"):
             sub_expr.children[:] = [
@@ -207,6 +208,15 @@ def multiplication_zero(expr: AstNode) -> None:
                 if child.value == 0:
                     sub_expr.value = 1
                     sub_expr.children = []
+
+
+def apply_identities(expr: AstNode) -> None:
+    for sub_expr in expr:
+        changed = False
+        while True:
+            additive_identity(sub_expr)
+            multiplicative_identity(sub_expr)
+            multiplication_zero(sub_expr)
 
 
 if __name__ == "__main__":
