@@ -1,4 +1,4 @@
-from symbols import Variable, Operator
+from symbols import Variable, Operator, operators
 from astree import AstNode
 
 
@@ -41,7 +41,7 @@ class Rule:
         """
         changed: bool = False
         for sub_expr in expr:
-            changed = changed or self.apply(sub_expr)
+            changed = self.apply(sub_expr) or changed
         return changed
 
 
@@ -53,7 +53,7 @@ def apply_all_rules(expr: AstNode) -> None:
     while True:
         changed: bool = False
         for rule in rules:
-            changed = changed or rule.apply_recursive(expr)
+            changed = rule.apply_recursive(expr) or changed
         if not prev_changed and not changed:
             break
         else:
@@ -127,6 +127,86 @@ rules: set[Rule] = {
         AstNode.astify_expr("f exp x f D *"),
     ),
 }
+
+
+def normalise(expr: AstNode):
+    subtraction_removal.apply_recursive(expr)
+    flatten2(expr)
+    sort_commutative(expr)
+
+
+subtraction_removal: Rule = Rule(
+    "subtraction to multiplication by -1",
+    AstNode.astify("f - g"),
+    AstNode.astify("f + ( -1 * g )"),
+)
+
+
+def flatten(expr: AstNode) -> bool:
+    """Flattens the operator at the root of expr with any of its immediate
+    children if possible.
+    """
+    flattened: bool = False
+    if isinstance(expr.value, Operator) and expr.value.associative == "full":
+        new_children: list[AstNode] = []
+        for child in expr.children:
+            if expr.value == child.value:
+                new_children.extend(child.children)
+                flattened = True
+            else:
+                new_children.append(child)
+        expr.children = new_children
+    return flattened
+
+
+def flatten2(expr: AstNode) -> bool:
+    """Recursively flattens any operators in expr with any immediate children if
+    possible."""
+    flattened: bool = False
+    for sub_expr in expr:
+        flattened = flatten(sub_expr) or flattened
+    return flattened
+
+
+def expr_sort_key(expr: AstNode) -> tuple[int, float | str | int]:
+    match expr.value:
+        case float():
+            return (0, expr.value)
+        case Variable():
+            return (1, expr.value.string)
+        case _:  # case Operator():
+            return (2, expr.value.precedence)
+
+
+def sort_commutative(expr: AstNode) -> None:
+    for sub_expr in expr:
+        if isinstance(sub_expr.value, Operator) and sub_expr.value.commutative:
+            sub_expr.children.sort(key=expr_sort_key)
+
+
+def additive_identity(expr: AstNode) -> None:
+    for sub_expr in expr:
+        if sub_expr.value == operators.get("+"):
+            sub_expr.children[:] = [
+                child for child in sub_expr.children if child.value != 0
+            ]
+
+
+def multiplicative_identity(expr: AstNode) -> None:
+    for sub_expr in expr:
+        if sub_expr.value == operators.get("*"):
+            sub_expr.children[:] = [
+                child for child in sub_expr.children if child.value != 1
+            ]
+
+
+def multiplication_zero(expr: AstNode) -> None:
+    for sub_expr in expr:
+        if sub_expr.value == operators.get("*"):
+            for child in sub_expr.children:
+                if child.value == 0:
+                    sub_expr.value = 1
+                    sub_expr.children = []
 
 
 if __name__ == "__main__":

@@ -1,8 +1,5 @@
 from symbols import Variable, Operator, operators
 
-operators["("] = Operator("(", 0, 0, "", None)
-operators[")"] = Operator(")", 0, 0, "", None)
-
 
 type Token = float | Operator | Variable
 type Operand = float | Variable
