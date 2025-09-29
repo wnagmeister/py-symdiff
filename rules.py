@@ -3,6 +3,8 @@ from astree import AstNode
 
 
 class Rule:
+    """Transformation rule for AstNode trees."""
+
     def __init__(self, name: str, pattern: AstNode, replacement: AstNode):
         self.name = name
         self.pattern = pattern
@@ -17,8 +19,8 @@ class Rule:
     # or does it work??? once a node is subbed in, its skipped
 
     def apply(self, expr: AstNode) -> bool:
-        """Applies the rule in place onto the expression expr if possible.
-        Applies it to the whole of expr; it does not apply it to
+        """Applies the rule in place onto the expression expr if possible. The
+        rule must match to the whole of expr; it does not match it to
         subexpressions. At the end, returns True if expr was modified, False if
         not.
         """
@@ -33,35 +35,20 @@ class Rule:
             return False
 
     def apply_recursive(self, expr: AstNode) -> bool:
+        """Applies the rule in place to the expression expr. Will iterate
+        recursively over subexpressions, and attempt to apply the rule on each one
+        if possible. Returns True if expr was modified, False if not.
+        """
         changed: bool = False
         for sub_expr in expr:
             changed = changed or self.apply(sub_expr)
         return changed
 
 
-rules: set[Rule] = {
-    Rule("Add 0 1", AstNode.astify("f + 0"), AstNode.astify("f")),
-    Rule("Add 0 2", AstNode.astify("0 + f"), AstNode.astify("f")),
-    Rule("Multiply 0 1", AstNode.astify("f * 0"), AstNode.astify("0")),
-    Rule("Multiply 0 2", AstNode.astify("0 * f"), AstNode.astify("0")),
-    Rule("Multiply 1 1", AstNode.astify("f * 1"), AstNode.astify("f")),
-    Rule("Multiply 1 2", AstNode.astify("1 * f"), AstNode.astify("f")),
-    Rule("x + x = 2x", AstNode.astify("f + f"), AstNode.astify("2 * f")),
-    Rule("Derivative w.r.t itself", AstNode.astify("f D f"), AstNode.astify("1")),
-    Rule(
-        "Product rule",
-        AstNode.astify_expr("x f g * D"),
-        AstNode.astify_expr("x f D g * f x g D * +"),
-    ),
-    Rule(
-        "Derivative of exp",
-        AstNode.astify_expr("x f exp D"),
-        AstNode.astify_expr("f exp x f D *"),
-    ),
-}
-
-
 def apply_all_rules(expr: AstNode) -> None:
+    """Continuously applies every rule in the rules dictionary onto the
+    expression. Stops when every rule has been applied twice without any effect.
+    """
     prev_changed: bool = False
     while True:
         changed: bool = False
@@ -118,6 +105,28 @@ def substitute(expr: AstNode, bindings: dict[Variable, AstNode]) -> None:
                     expr.children[i] = binding
             else:
                 substitute(child, bindings)
+
+
+rules: set[Rule] = {
+    Rule("Add 0 1", AstNode.astify("f + 0"), AstNode.astify("f")),
+    Rule("Add 0 2", AstNode.astify("0 + f"), AstNode.astify("f")),
+    Rule("Multiply 0 1", AstNode.astify("f * 0"), AstNode.astify("0")),
+    Rule("Multiply 0 2", AstNode.astify("0 * f"), AstNode.astify("0")),
+    Rule("Multiply 1 1", AstNode.astify("f * 1"), AstNode.astify("f")),
+    Rule("Multiply 1 2", AstNode.astify("1 * f"), AstNode.astify("f")),
+    Rule("x + x = 2x", AstNode.astify("f + f"), AstNode.astify("2 * f")),
+    Rule("Derivative w.r.t itself", AstNode.astify("f D f"), AstNode.astify("1")),
+    Rule(
+        "Product rule",
+        AstNode.astify_expr("x f g * D"),
+        AstNode.astify_expr("x f D g * f x g D * +"),
+    ),
+    Rule(
+        "Derivative of exp",
+        AstNode.astify_expr("x f exp D"),
+        AstNode.astify_expr("f exp x f D *"),
+    ),
+}
 
 
 if __name__ == "__main__":

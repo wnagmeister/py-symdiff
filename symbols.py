@@ -31,10 +31,7 @@ class Operator:
         self.associativity = associativity
         self.func = func
 
-    def is_op(self, string):
-        return self.string == string
-
-    def __eq__(self, other) -> bool:  # TODO: Use this not above
+    def __eq__(self, other) -> bool:
         if isinstance(other, Operator):
             return self.string == other.string
         else:

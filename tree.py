@@ -1,4 +1,5 @@
 class Node:
+    """Generic (arbitrary number of children) tree data structure."""
 
     nodewidth = 5
 
@@ -9,11 +10,12 @@ class Node:
 
     @classmethod
     def join(cls, value, children: list):
+        """Joins a list of nodes under a parent node with value value."""
         return cls(value, children)
 
     @classmethod
     def leafify(cls, value):
-        """Returns a leaf node with value value and no children"""
+        """Returns a leaf node with value value and no children."""
         return cls(value, [])
 
     def is_leaf(self) -> bool:
@@ -25,11 +27,11 @@ class Node:
         if self.is_leaf():
             return 0
         else:
-            return (
-                max(child.height() for child in self.children) + 1
-            )  # Stack overflow possibility
+            return max(child.height() for child in self.children) + 1
 
     def is_equal(self, other: "Node", compare) -> bool:
+        """Compares two trees for equality. Two node values are equal if the
+        given compare function for node values agrees."""
         if self.is_leaf() ^ other.is_leaf():
             return False
         elif self.num_children != other.num_children:
@@ -48,13 +50,13 @@ class Node:
                 self.children[i] = replacement
 
     def traverse(self):
-        """Traverses over the subnodes in postorder"""
+        """Traverses over the subnodes in post-order."""
         for child in self.children:
             yield from child.traverse()
         yield self
 
     def __iter__(self):
-        """Iterates over the subnodes in postorder"""
+        """Iterates over the subnodes in post-order."""
         return self.traverse()
 
     """"Tree printing methods"""

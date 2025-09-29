@@ -4,19 +4,14 @@ operators["("] = Operator("(", 0, 0, "", None)
 operators[")"] = Operator(")", 0, 0, "", None)
 
 
-def precedence_ge(op1, op2):
-    for key in operators:
-        if key == op1:
-            return -1
-        if key == op2:
-            return 1
-
-
 type Token = float | Operator | Variable
 type Operand = float | Variable
 
 
 def tokenify(string: str) -> Token:
+    """Converts a string representing a number, variable or operator into a
+    token. Strings not recognised as numbers or operators become variables.
+    """
     if string.lstrip("-").isnumeric():
         return float(string)
     elif operator := operators.get(string):
@@ -26,13 +21,20 @@ def tokenify(string: str) -> Token:
 
 
 def string_to_tokens(string: str) -> list[Token]:
+    """Converts a string expression into a list of corresponding tokens."""
     str_tokens = string.split()
     tokens = [tokenify(str_token) for str_token in str_tokens]
     return tokens
 
 
 def shunting_yard(tokens: list[Token]) -> list[Token]:
-    """shunting yard alg, to be implemented"""
+    """Shunting yard algorithm. Currently considers basic operators and single
+    variable functions. Associativity is assumed to be always left, and
+    differentiation w.r.t. x is implemented as the highest precedence infix
+    operator, notated:
+        x D y   <->    (d/dx)y
+
+    """
     out_stack: list[Token] = []
     operator_stack: list[Operator] = []
 
