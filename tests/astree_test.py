@@ -3,28 +3,42 @@ from tokens import string_to_tokens, shunting_yard
 import pytest
 
 
-# TODO: Collect a (string, tokens, AST) triple dataset.
+string_expressions = """3 * ( x + 2 ) - sin ( y )
+a / ( b + cos ( c ) )
+( x + y ) * ( 4 - cos ( z ) )
+( 5 + sin ( x ) ) / ( 2 + y )
+2 * ( sin ( x + y ) - 3 ) * z""".split(
+    "\n"
+)
+
+"""
+3*(x+2)-sin(y)
+a/(b+cos(c))
+(x+y)*(4-cos(z))
+(5+sin(x))/(2+y)
+2*(sin(x+y)-3)*z
+"""
+
+
+@pytest.fixture(params=string_expressions)
+def tokens_infix(request):
+    return string_to_tokens(request.param)
 
 
 @pytest.fixture
-def tokens_rpn():
-    return shunting_yard(string_to_tokens("1 + exp y oq2"))
+def tokens_rpn(tokens_infix):
+    return shunting_yard(tokens_infix)
 
 
-@pytest.fixture
-def tokens_infix():
-    return string_to_tokens("1 + exp y oq2")
-
-
-def test_astify_rpn():
-    pass
+def test_astify_rpn(tokens_rpn):
+    expr = AstNode.astify_rpn(tokens_rpn)
 
 
 def test_astify_expr():
     pass
 
 
-@pytest.mark.parametrize("string", ["1 + exp y oq2"])
+@pytest.mark.parametrize("string", string_expressions)
 def test_astify(string):
     expr = AstNode.astify(string)
 
