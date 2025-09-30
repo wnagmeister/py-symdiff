@@ -187,7 +187,7 @@ def sort_commutative(expr: AstNode) -> None:
 
 def additive_identity(expr: AstNode) -> bool:
     for sub_expr in expr:
-        if sub_expr.value == operators.get("+"):
+        if sub_expr.value == operators["+"]:
             sub_expr.children[:] = [
                 child for child in sub_expr.children if child.value != 0
             ]
@@ -195,7 +195,7 @@ def additive_identity(expr: AstNode) -> bool:
 
 def multiplicative_identity(expr: AstNode) -> None:
     for sub_expr in expr:
-        if sub_expr.value == operators.get("*"):
+        if sub_expr.value == operators["*"]:
             sub_expr.children[:] = [
                 child for child in sub_expr.children if child.value != 1
             ]
@@ -203,7 +203,7 @@ def multiplicative_identity(expr: AstNode) -> None:
 
 def multiplication_zero(expr: AstNode) -> None:
     for sub_expr in expr:
-        if sub_expr.value == operators.get("*"):
+        if sub_expr.value == operators["*"]:
             for child in sub_expr.children:
                 if child.value == 0:
                     sub_expr.value = 1

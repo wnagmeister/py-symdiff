@@ -40,19 +40,19 @@ class AstNode(Node):
     """Overloading operators to make making new ASTs easier."""
 
     def __add__(self, other: "AstNode") -> "AstNode":
-        return self.__class__.join(operators.get("+"), [self, other])
+        return self.__class__.join(operators["+"], [self, other])
 
     def __mul__(self, other: "AstNode") -> "AstNode":
-        return self.__class__.join(operators.get("*"), [self, other])
+        return self.__class__.join(operators["*"], [self, other])
 
     def __sub__(self, other: "AstNode") -> "AstNode":
-        return self.__class__.join(operators.get("-"), [self, other])
+        return self.__class__.join(operators["-"], [self, other])
 
     def __truediv__(self, other: "AstNode") -> "AstNode":
-        return self.__class__.join(operators.get("/"), [self, other])
+        return self.__class__.join(operators["/"], [self, other])
 
     def __pow__(self, other: "AstNode") -> "AstNode":
-        return self.__class__.join(operators.get("^"), [self, other])
+        return self.__class__.join(operators["^"], [self, other])
 
     def copy(self) -> "AstNode":
         """Copies the tree. Creates new instances of any variable

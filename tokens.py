@@ -49,27 +49,27 @@ def shunting_yard(tokens: list[Token]) -> list[Token]:
             elif token.arity == 2:
                 while (
                     len(operator_stack) > 0
-                    and not operator_stack[-1] == operators.get("(")
+                    and not operator_stack[-1] == operators["("]
                     and operator_stack[-1] >= token
                 ):
                     out_stack.append(operator_stack.pop())
                 operator_stack.append(token)
 
-            elif token == operators.get("("):
+            elif token == operators["("]:
                 operator_stack.append(token)
 
-            elif token == operators.get(")"):
+            elif token == operators[")"]:
                 assert len(operator_stack) > 0
-                while not operator_stack[-1] == operators.get("("):
+                while not operator_stack[-1] == operators["("]:
                     out_stack.append(operator_stack.pop())
-                assert operator_stack[-1] == operators.get("(")
+                assert operator_stack[-1] == operators["("]
                 operator_stack.pop()
 
                 if len(operator_stack) > 0 and operator_stack[-1].arity == 1:
                     out_stack.append(operator_stack.pop())
 
     while len(operator_stack) > 0:
-        assert not operator_stack[-1] == operators.get("(")
+        assert not operator_stack[-1] == operators["("]
         out_stack.append(operator_stack.pop())
 
     return out_stack
