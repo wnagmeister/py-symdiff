@@ -9,13 +9,6 @@ class Node:
         self.num_children = len(children)
 
     @classmethod
-    def join(
-        cls, value, children: list
-    ):  # TODO: Remove this method, does the same thing as Node(value, children), which is intrinsically a class method.
-        """Joins a list of nodes under a parent node with value value."""
-        return cls(value, children)
-
-    @classmethod
     def leafify(cls, value):
         """Returns a leaf node with value value and no children."""
         return cls(value, [])

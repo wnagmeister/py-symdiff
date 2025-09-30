@@ -10,6 +10,15 @@ def SubClass():
     return SubNode
 
 
+def test_node(SubClass):
+    node1 = Node.leafify(1)
+    node2 = Node.leafify(2)
+    node3 = SubClass(3, [node1, node2])
+    assert isinstance(node3, Node)
+    assert type(node3) is not Node
+    assert node3.children == [node1, node2]
+
+
 def test_leafify(SubClass):
     node = Node.leafify(2)
     assert node.children == []
@@ -19,15 +28,6 @@ def test_leafify(SubClass):
     assert subnode.value == 6
     assert isinstance(subnode, Node)
     assert type(subnode) is not Node
-
-
-def test_join(SubClass):
-    node1 = Node.leafify(1)
-    node2 = Node.leafify(2)
-    node3 = SubClass.join(3, [node1, node2])
-    assert isinstance(node3, Node)
-    assert type(node3) is not Node
-    assert node3.children == [node1, node2]
 
 
 def test_is_leaf():
@@ -41,11 +41,11 @@ def test_is_leaf():
 def test_tree():
     node1 = Node.leafify(1)
     node2 = Node.leafify(2)
-    node3 = Node.join(3, [node2])
-    node4 = Node.join(4, [node1, node3])
+    node3 = Node(3, [node2])
+    node4 = Node(4, [node1, node3])
     node5 = Node.leafify(5)
-    node6 = Node.join(6, [node5])
-    node7 = Node.join(7, [node4, node6])
+    node6 = Node(6, [node5])
+    node7 = Node(7, [node4, node6])
     return node7
 
 
@@ -85,7 +85,7 @@ def test_iter(test_tree):
     assert num == 7
     for i, node in enumerate(test_tree):
         for i, child in enumerate(node.children):
-            node.children[i] = Node.join(child.value * 10, child.children)
+            node.children[i] = Node(child.value * 10, child.children)
     for i, node in enumerate(test_tree):
         if node is not test_tree:
             assert node.value == 10 * (i + 1)

@@ -19,7 +19,7 @@ class AstNode(Node):
             elif isinstance(token, Operator):
                 children = [stack.pop() for i in range(token.arity)]
                 children.reverse()
-                new_node = cls.join(token, children)
+                new_node = cls(token, children)
                 stack.append(new_node)
         return stack.pop()
 
@@ -40,19 +40,19 @@ class AstNode(Node):
     """Overloading operators to make making new ASTs easier."""
 
     def __add__(self, other: "AstNode") -> "AstNode":
-        return self.__class__.join(operators["+"], [self, other])
+        return self.__class__(operators["+"], [self, other])
 
     def __mul__(self, other: "AstNode") -> "AstNode":
-        return self.__class__.join(operators["*"], [self, other])
+        return self.__class__(operators["*"], [self, other])
 
     def __sub__(self, other: "AstNode") -> "AstNode":
-        return self.__class__.join(operators["-"], [self, other])
+        return self.__class__(operators["-"], [self, other])
 
     def __truediv__(self, other: "AstNode") -> "AstNode":
-        return self.__class__.join(operators["/"], [self, other])
+        return self.__class__(operators["/"], [self, other])
 
     def __pow__(self, other: "AstNode") -> "AstNode":
-        return self.__class__.join(operators["^"], [self, other])
+        return self.__class__(operators["^"], [self, other])
 
     def copy(self) -> "AstNode":
         """Copies the tree. Creates new instances of any variable
@@ -67,7 +67,7 @@ class AstNode(Node):
             # Operator
             case _:
                 children = [child.copy() for child in self.children]
-                return cls.join(self.value, children)
+                return cls(self.value, children)
 
 
 if __name__ == "__main__":
