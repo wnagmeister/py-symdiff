@@ -9,12 +9,13 @@ def tokenify(string: str) -> Token:
     """Converts a string representing a number, variable or operator into a
     token. Strings not recognised as numbers or operators become variables.
     """
-    if string.lstrip("-").isnumeric():
+    try:
         return float(string)
-    elif operator := operators.get(string):
-        return operator
-    else:
-        return Variable(string)
+    except ValueError:
+        if operator := operators.get(string):
+            return operator
+        else:
+            return Variable(string)
 
 
 def string_to_tokens(string: str) -> list[Token]:
