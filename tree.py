@@ -31,9 +31,9 @@ class Node:
         else:
             return max(child.height() for child in self.children) + 1
 
-    def is_equal(self, other: "Node", compare) -> bool:
+    def is_equal(self, other: "Node", compare=lambda x, y: x == y) -> bool:
         """Compares two trees for equality. Two node values are equal if the
-        given compare function for node values agrees."""
+        given compare function (default __eq__) for node values agrees."""
         if self.is_leaf() ^ other.is_leaf():
             return False
         elif self.num_children != other.num_children:
