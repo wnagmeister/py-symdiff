@@ -38,12 +38,6 @@ class Operator:
         self.commutative = commutative
         self.func = func
 
-    def __eq__(self, other) -> bool:
-        if isinstance(other, Operator):
-            return self.string == other.string
-        else:
-            return False
-
     def __ge__(self, other) -> bool:
         return self.precedence >= other.precedence
 
