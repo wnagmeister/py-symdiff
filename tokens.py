@@ -42,12 +42,10 @@ def shunting_yard(tokens: list[Token]) -> list[Token]:
     operator_stack: list[Operator] = []
 
     for token in tokens:
-
         if isinstance(token, float | Variable):
             out_stack.append(token)
 
         elif isinstance(token, Operator):
-
             if token.arity == 1:
                 operator_stack.append(token)
 

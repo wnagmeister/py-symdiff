@@ -1,4 +1,4 @@
-from symbols import Variable, Operator, operators
+from symbols import Variable, operators
 
 
 def test_variable():
