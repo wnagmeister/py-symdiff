@@ -69,6 +69,21 @@ class AstNode(Node):
                 children = [child.copy() for child in self.children]
                 return cls(self.value, children)
 
+    def variables(self) -> set[Variable]:
+        variables: set[Variable] = set()
+        for node in self:
+            if isinstance(node.value, Variable):
+                variables.add(node.value)
+        return variables
+
+    def substitute_variables(self, substitutions: dict[Variable, "AstNode"]) -> None:
+        for node in self:
+            for variable in substitutions:
+                if node.value == variable:
+            if substitution := substitutions.get(node.value):
+                node.value = substitution.value
+                node.children = substitution.children
+
 
 if __name__ == "__main__":
     pass
