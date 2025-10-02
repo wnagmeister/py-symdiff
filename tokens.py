@@ -18,6 +18,27 @@ def tokenify(string: str) -> Token:
             return Variable(string)
 
 
+def match_scalar(string: str) -> Token | str:
+    for i in range(len(string)):
+        try:
+            x = float(string[: i + 1])
+        except ValueError:
+            pass
+    pass
+
+
+def match_operator(string: str) -> Token | str:
+    for i in range(len(string)):
+        if operator := operators.get(string[:i]):
+            return operator, string[i:]
+    return string
+
+
+def match_variable(string: str) -> Token | str:
+    for i in range:
+        pass
+
+
 def string_to_tokens(string: str) -> list[Token]:
     """Converts a string expression into a list of corresponding tokens."""
     str_tokens = string.split()
