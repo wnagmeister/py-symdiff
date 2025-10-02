@@ -6,7 +6,6 @@ class Node:
     def __init__(self, value, children: list):
         self.value = value
         self.children = children
-        self.num_children = len(children)
 
     @classmethod
     def leafify(cls, value):
@@ -24,12 +23,15 @@ class Node:
         else:
             return max(child.height() for child in self.children) + 1
 
+    def num_children(self) -> int:
+        return len(self.children)
+
     def is_equal(self, other: "Node", compare=lambda x, y: x == y) -> bool:
         """Compares two trees for equality. Two node values are equal if the
         given compare function (default __eq__) for node values agrees."""
         if self.is_leaf() ^ other.is_leaf():
             return False
-        elif self.num_children != other.num_children:
+        elif self.num_children() != other.num_children():
             return False
         elif not compare(self.value, other.value):
             return False
@@ -73,7 +75,7 @@ class Node:
 
         lst = []
         for i, child in enumerate(self.children):
-            if i == self.num_children // 2:
+            if i == self.num_children() // 2:
                 lst.append(Node.make_branch(repr(self.value)))
             lst.append(Node.pad_para(repr(child)))
         return "\n".join(lst)
