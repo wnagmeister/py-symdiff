@@ -2,6 +2,27 @@ from symbols import Variable, Operator, operators
 from astree import AstNode
 
 
+class PatternVariable(Variable):
+    def __init__(self, string, match_type=None):
+        super().__init__(string)
+        if not match_type:
+            self.match_type = self.default_match_type(string)
+
+    @staticmethod
+    def default_match_type(string: str):
+        match string:
+            case "s":
+                return float
+            case "o":
+                return Operator
+            case "v":
+                return Variable
+            case "l":
+                return "literal"
+            case _:
+                return "all"
+
+
 class Rule:
     """Transformation rule for AstNode trees."""
 
@@ -150,12 +171,12 @@ def flatten(expr: AstNode) -> bool:
     flattened: bool = False
     if isinstance(expr.value, Operator) and expr.value.associative == "full":
         new_children: list[AstNode] = []
-        for child in expr.children:
-            if expr.value == child.value:
-                new_children.extend(child.children)
+        for sub_expr in expr.children:
+            if expr.value == sub_expr.value:
+                new_children.extend(sub_expr.children)
                 flattened = True
             else:
-                new_children.append(child)
+                new_children.append(sub_expr)
         expr.children = new_children
     return flattened
 
@@ -186,37 +207,49 @@ def sort_commutative(expr: AstNode) -> None:
 
 
 def additive_identity(expr: AstNode) -> bool:
+    changed: bool = False
     for sub_expr in expr:
-        if sub_expr.value == operators["+"]:
+        if sub_expr.value == operators["+"] and (old_length := len(sub_expr.children)):
             sub_expr.children[:] = [
                 child for child in sub_expr.children if child.value != 0
             ]
+            changed = old_length != len(sub_expr.children) or changed
+    return changed
 
 
-def multiplicative_identity(expr: AstNode) -> None:
+def multiplicative_identity(expr: AstNode) -> bool:
+    changed: bool = False
     for sub_expr in expr:
-        if sub_expr.value == operators["*"]:
+        if sub_expr.value == operators["*"] and (old_length := len(sub_expr.children)):
             sub_expr.children[:] = [
                 child for child in sub_expr.children if child.value != 1
             ]
+            changed = old_length != len(sub_expr.children) or changed
+    return changed
 
 
-def multiplication_zero(expr: AstNode) -> None:
+def multiplication_zero(expr: AstNode) -> bool:
+    changed: bool = False
     for sub_expr in expr:
         if sub_expr.value == operators["*"]:
             for child in sub_expr.children:
                 if child.value == 0:
-                    sub_expr.value = 1
+                    sub_expr.value = 0.0
                     sub_expr.children = []
+                    changed = True
+                    break
+    return changed
 
 
 def apply_identities(expr: AstNode) -> None:
     for sub_expr in expr:
         changed = False
         while True:
-            additive_identity(sub_expr)
-            multiplicative_identity(sub_expr)
-            multiplication_zero(sub_expr)
+            changed = additive_identity(sub_expr) or changed
+            changed = multiplicative_identity(sub_expr) or changed
+            changed = multiplication_zero(sub_expr) or changed
+            if not changed:
+                break
 
 
 if __name__ == "__main__":
