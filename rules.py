@@ -24,6 +24,18 @@ class PatternVariable(Variable):
         else:
             return isinstance(expr.value, self.match_type)
 
+    @classmethod
+    def make_patt(cls, expr: AstNode) -> None:
+        """Replaces all the Variables in a AST with PatternVariables, with match typed inferred as usual."""
+        # for sub_expr in expr:
+        # if isinstance(sub_expr.value, Variable):
+        #     sub_expr.value = cls(sub_expr.value.string)
+        substitutions = {
+            var: AstNode.leafify(PatternVariable(var.string))
+            for var in expr.variables()
+        }
+        expr.substitute_variables(substitutions)
+
 
 class Rule:
     """Transformation rule for AstNode trees."""
@@ -139,13 +151,6 @@ def match2(
 
 
 rules: set[Rule] = {
-    Rule("Add 0 1", AstNode.astify("f + 0"), AstNode.astify("f")),
-    Rule("Add 0 2", AstNode.astify("0 + f"), AstNode.astify("f")),
-    Rule("Multiply 0 1", AstNode.astify("f * 0"), AstNode.astify("0")),
-    Rule("Multiply 0 2", AstNode.astify("0 * f"), AstNode.astify("0")),
-    Rule("Multiply 1 1", AstNode.astify("f * 1"), AstNode.astify("f")),
-    Rule("Multiply 1 2", AstNode.astify("1 * f"), AstNode.astify("f")),
-    Rule("x + x = 2x", AstNode.astify("f + f"), AstNode.astify("2 * f")),
     Rule("Derivative w.r.t itself", AstNode.astify("f D f"), AstNode.astify("1")),
     Rule(
         "Product rule",
@@ -224,6 +229,9 @@ def additive_identity(expr: AstNode) -> bool:
                 child for child in sub_expr.children if child.value != 0
             ]
             changed = old_length != len(sub_expr.children) or changed
+            if len(sub_expr.children) < 2:
+                sub_expr.value = sub_expr.children[0].value
+                sub_expr.children = sub_expr.children[0].children
     return changed
 
 
@@ -235,6 +243,9 @@ def multiplicative_identity(expr: AstNode) -> bool:
                 child for child in sub_expr.children if child.value != 1
             ]
             changed = old_length != len(sub_expr.children) or changed
+            if len(sub_expr.children) < 2:
+                sub_expr.value = sub_expr.children[0].value
+                sub_expr.children = sub_expr.children[0].children
     return changed
 
 
