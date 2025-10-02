@@ -78,8 +78,6 @@ class AstNode(Node):
 
     def substitute_variables(self, substitutions: dict[Variable, "AstNode"]) -> None:
         for node in self:
-            for variable in substitutions:
-                if node.value == variable:
             if substitution := substitutions.get(node.value):
                 node.value = substitution.value
                 node.children = substitution.children
