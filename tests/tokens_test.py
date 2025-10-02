@@ -3,7 +3,7 @@ from symbols import Variable, Operator, operators
 from astree import AstNode
 import pytest
 
-string_expressions = [
+test_expressions_full = [
     (
         "3 * ( x + 2 ) - sin ( y )",
         [
@@ -32,6 +32,7 @@ string_expressions = [
                 AstNode(operators["sin"], [AstNode.leafify(Variable("y"))]),
             ],
         ),
+        {Variable("x"), Variable("y")},
     ),
     (
         "1.5 / ( b + exp ( constantpi ) )",
@@ -58,6 +59,7 @@ string_expressions = [
                 ),
             ],
         ),
+        {Variable("b"), Variable("constantpi")},
     ),
     (
         "ln x + -7.8 * x",
@@ -79,8 +81,11 @@ string_expressions = [
                 ),
             ],
         ),
+        {Variable("x")},
     ),
 ]
+
+infix_string_rpn_tokens = [(a, b) for (a, b, c, d) in test_expressions_full]
 
 
 def test_tokenify():
@@ -92,6 +97,6 @@ def test_tokenify():
     assert isinstance(tokenify("1-2"), Variable)
 
 
-@pytest.mark.parametrize("infix_string, rpn_tokens, asttree", string_expressions)
-def test_shunting_yard(infix_string, rpn_tokens, asttree):
+@pytest.mark.parametrize("infix_string, rpn_tokens", infix_string_rpn_tokens)
+def test_shunting_yard(infix_string, rpn_tokens):
     assert shunting_yard(string_to_tokens(infix_string)) == rpn_tokens
