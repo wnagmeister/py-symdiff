@@ -1,6 +1,9 @@
 from symbols import Operator, Variable, operators
 from astree import AstNode
-from typing import cast
+
+
+# TODO: replace: expr.value = other.value, expr.children = other.children with
+# a unified susbtitution mechanism which does not erase expr.
 
 
 class Transformation:
@@ -104,6 +107,7 @@ class Evaluation(Transformation):
 
 
 class Simplification(Transformation):
+    # Does not require flattening to work?
     def apply_root(self, expr: AstNode) -> bool:
         """If no summands/factors left, replaces expr with the identity of the
         operator. If exactly one summand/factor left, folds it into the
@@ -113,10 +117,11 @@ class Simplification(Transformation):
             old_length: int = expr.num_children()
             expr.children[:] = [child for child in expr.children if child.value != 0]
             if expr.num_children() == 0:
-                expr.value == 0.0
+                expr.value = 0.0
                 return True
             elif expr.num_children() == 1:
-                expr.value == expr.children.pop()
+                expr.value = expr.children[0].value
+                expr.children = expr.children[0].children
                 return True
             else:
                 return old_length == expr.num_children()
@@ -129,111 +134,15 @@ class Simplification(Transformation):
             old_length: int = expr.num_children()
             expr.children[:] = [child for child in expr.children if child.value != 1]
             if expr.num_children() == 0:
-                expr.value == 1.0
+                expr.value = 1.0
                 return True
             elif expr.num_children() == 1:
-                expr.value == expr.children.pop()
+                expr.value = expr.children[0].value
+                expr.children = expr.children[0].children
                 return True
             else:
                 return old_length == expr.num_children()
         return False
-
-
-class PatternVariable(Variable):
-    def __init__(self, string, match_type: None | float = None):
-        """If a match type is not given, it is inferred from the string."""
-        super().__init__(string)
-        if not match_type:
-            self.match_type = self.default_match_type(string)
-
-    @staticmethod
-    def default_match_type(string: str):
-        match string:
-            case "s":
-                return float
-            case _:
-                return "all"
-
-    def match(self, expr: AstNode) -> bool:
-        """Returns whether the PatternVariable matches expr at the root."""
-        if self.match_type == "all":
-            return True
-        else:
-            return isinstance(expr.value, self.match_type)
-
-    @classmethod
-    def patternify(cls, expr: AstNode) -> None:
-        """Replaces all the non-Pattern Variables in a AST with
-        PatternVariables, with match_type inferred as usual.
-        """
-        substitutions = {
-            var: AstNode.leafify(PatternVariable(var.string))
-            for var in expr.variables()
-            if not isinstance(var, PatternVariable)
-        }
-        expr.substitute_variables(substitutions)
-
-
-class PatternMatching(Transformation):
-    def __init__(self, name: str, pattern: AstNode, replacement: AstNode):
-        self.name = (name,)
-        self.pattern = pattern
-        self.replacement = replacement
-        PatternVariable.patternify(self.pattern)
-        PatternVariable.patternify(self.replacement)
-
-    def apply_root(self, expr: AstNode):
-        """Applies the transformation in place onto the root of expr if able."""
-        bindings: dict[PatternVariable, AstNode] = {}
-        if PatternMatching.match(expr, self.pattern, bindings):
-            replacement = self.replacement.copy()
-            replacement.substitute_variables(cast(dict[Variable, AstNode], bindings))
-            expr.value = replacement.value
-            expr.children = replacement.children
-            return True
-        else:
-            return False
-
-    @staticmethod
-    def match(
-        expr: AstNode, pattern: AstNode, bindings: dict[PatternVariable, AstNode]
-    ) -> bool:
-        match pattern.value:
-            case float():
-                return expr.value == pattern.value
-
-            case PatternVariable():
-                if pattern.value.match_type == "all" or isinstance(
-                    expr.value, pattern.value.match_type
-                ):
-                    if existing_binding := bindings.get(pattern.value):
-                        return expr.is_equal(existing_binding)
-                    else:
-                        bindings[pattern.value] = expr
-                        return True
-                else:
-                    return False
-
-            case Variable():
-                return expr.value == pattern.value
-
-            case _:  # Operator():
-                if not isinstance(expr.value, Operator) or expr.value != pattern.value:
-                    return False
-                else:
-                    for expr_child, pattern_child in zip(
-                        expr.children, pattern.children
-                    ):
-                        if not PatternMatching.match(
-                            expr_child, pattern_child, bindings
-                        ):
-                            return False
-                    return True
-
-
-class Differentiation(PatternMatching):
-    def apply_root(self, expr: AstNode):
-        pass
 
 
 if __name__ == "__main__":
