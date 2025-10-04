@@ -1,4 +1,4 @@
-from symbols import Operator, Variable
+from symbols import Operator, Variable, operators
 from astree import AstNode
 from typing import cast
 
@@ -62,38 +62,81 @@ class CanonicalOrdering(Transformation):
 
 
 class Evaluation(Transformation):
-    def apply_root(self, expr: AstNode) -> bool:
-        applied = False
-        if isinstance(expr.value, Operator) and expr.value.func:
-            number: None | float = None
-            match expr.value.arity:
-                case 1:
-                    if isinstance(expr.children[0].value, float):
-                        number = expr.value.func(expr.children[0].value)
-                case 2:
-                    numbers = [
-                        node for node in expr.children if isinstance(node.value, float)
-                    ]
-                    rest = [node for node in expr.children if node not in numbers]
-                    for node in numbers:
-                        if number is None:
-                            number = node.value
-                        else:
-                            number = expr.value.func(number, node.value)
-                    if number is not None:
-                        rest.append(AstNode.leafify(number))
+    """Evaluates an expression for concrete operators. Assumes that the
+    expression has been normalised with all subtractions and divisions replaced
+    with addition and multiplication, summands and factors have been ordered,
+    and that expressions with zero or one summand/factor which is a float have
+    been folded into the operator in the identity simplification phase.
+    """
 
-            if len(rest) != expr.num_children():
-                applied = True
-            expr.children = rest
-            if expr.num_children() == 1:
-                expr.value = expr.children[0].value
-                expr.children = expr.children[0].children
-        return applied
+    def apply_root(self, expr: AstNode) -> bool:
+        if (
+            isinstance(expr.value, Operator)
+            and expr.value.func
+            and expr.value.arity <= (num := self.num_floats(expr.children))
+        ):
+            if expr.value.arity == 1:
+                expr.value = expr.value.func(expr.children.pop(0).value)
+                expr.children = []
+            else:
+                result: float = expr.value.func(
+                    expr.children.pop(0).value, expr.children.pop(0).value
+                )
+                for i in range(num - 2):
+                    result = expr.value.func(result, expr.children.pop(0).value)
+                if expr.num_children() > 0:
+                    expr.children.insert(0, AstNode.leafify(result))
+                else:  # num < expr.num_children()
+                    expr.value = result
+                    expr.children = []
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def num_floats(nodes: list[AstNode]) -> int:
+        """Finds the number of nodes in a list which contain float values."""
+        num: int = 0
+        for node in nodes:
+            if isinstance(node.value, float):
+                num += 1
+        return num
 
 
 class Simplification(Transformation):
-    pass
+    def apply_root(self, expr: AstNode) -> bool:
+        """If no summands/factors left, replaces expr with the identity of the
+        operator. If exactly one summand/factor left, folds it into the
+        operator.
+        """
+        if expr.value == operators["+"]:
+            old_length: int = expr.num_children()
+            expr.children[:] = [child for child in expr.children if child.value != 0]
+            if expr.num_children() == 0:
+                expr.value == 0.0
+                return True
+            elif expr.num_children() == 1:
+                expr.value == expr.children.pop()
+                return True
+            else:
+                return old_length == expr.num_children()
+
+        elif expr.value == operators["*"]:
+            if 0.0 in [child.value for child in expr.children]:
+                expr.value = 0.0
+                expr.children = []
+                return True
+            old_length: int = expr.num_children()
+            expr.children[:] = [child for child in expr.children if child.value != 1]
+            if expr.num_children() == 0:
+                expr.value == 1.0
+                return True
+            elif expr.num_children() == 1:
+                expr.value == expr.children.pop()
+                return True
+            else:
+                return old_length == expr.num_children()
+        return False
 
 
 class PatternVariable(Variable):
@@ -120,10 +163,13 @@ class PatternVariable(Variable):
 
     @classmethod
     def patternify(cls, expr: AstNode) -> None:
-        """Replaces all the Variables in a AST with PatternVariables, with match_type inferred as usual."""
+        """Replaces all the non-Pattern Variables in a AST with
+        PatternVariables, with match_type inferred as usual.
+        """
         substitutions = {
             var: AstNode.leafify(PatternVariable(var.string))
             for var in expr.variables()
+            if not isinstance(var, PatternVariable)
         }
         expr.substitute_variables(substitutions)
 
@@ -133,6 +179,8 @@ class PatternMatching(Transformation):
         self.name = (name,)
         self.pattern = pattern
         self.replacement = replacement
+        PatternVariable.patternify(self.pattern)
+        PatternVariable.patternify(self.replacement)
 
     def apply_root(self, expr: AstNode):
         """Applies the transformation in place onto the root of expr if able."""
@@ -169,7 +217,7 @@ class PatternMatching(Transformation):
             case Variable():
                 return expr.value == pattern.value
 
-            case _:
+            case _:  # Operator():
                 if not isinstance(expr.value, Operator) or expr.value != pattern.value:
                     return False
                 else:

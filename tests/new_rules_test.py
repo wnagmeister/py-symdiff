@@ -2,6 +2,7 @@ from symbols import Variable
 from astree import AstNode
 from new_rules import Flattening, CanonicalOrdering, Evaluation
 import pytest
+import math
 
 
 @pytest.fixture
@@ -50,6 +51,10 @@ def test_evaluation(evaluator):
     expr = AstNode.astify("1 + 2")
     assert evaluator.apply_all(expr)
     assert expr.value == 3
-    expr = AstNode.astify("5 * ( 4 - 1 )")
+    expr = AstNode.astify("exp ( 2 ) * ( 4 + 1 )")
     assert evaluator.apply_all(expr)
-    assert expr.value == 15
+    assert expr.value == 5 * math.exp(2)
+    expr = AstNode.astify("5 * ( 4 + 1 ) + x")
+    assert evaluator.apply_all(expr)
+    expected_expr = AstNode.astify("25 + x")
+    assert expr.is_equal(expected_expr)
