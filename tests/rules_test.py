@@ -30,7 +30,7 @@ def simplifier():
 
 
 def test_flattening(flattener):
-    expr = AstNode.astify("y * ( ( 2 + x ) + -4 )")
+    expr = AstNode.astify("y * ((2 + x) + -4)")
     assert flattener.apply_all(expr)
     assert expr.children[1].children[0].value == 2
     assert expr.children[1].children[1].value == Variable("x")
@@ -38,7 +38,7 @@ def test_flattening(flattener):
 
 
 def test_canonicalordering(flattener, canonical_orderer):
-    expr = AstNode.astify("x + 3 + -5.7 + exp ( 11 ) + y")
+    expr = AstNode.astify("x + 3 + -5.7 + exp(11) + y")
     assert flattener.apply_all(expr)
     assert canonical_orderer.apply_all(expr)
     assert [repr(child.value) for child in expr.children] == [
@@ -54,21 +54,21 @@ def test_evaluation(evaluator):
     expr = AstNode.astify("1 + 2")
     assert evaluator.apply_all(expr)
     assert expr.value == 3
-    expr = AstNode.astify("exp ( 2 ) * ( 4 + 1 )")
+    expr = AstNode.astify("exp(2) * (4 + 1)")
     assert evaluator.apply_all(expr)
     assert expr.value == 5 * math.exp(2)
-    expr = AstNode.astify("5 * ( 4 + 1 ) + exp ( x )")
+    expr = AstNode.astify("5 * (4 + 1) + exp (x)")
     assert evaluator.apply_all(expr)
-    expected_expr = AstNode.astify("25 + exp ( x )")
+    expected_expr = AstNode.astify("25 + exp (x)")
     assert expr.is_equal(expected_expr)
 
 
 def test_simplification(simplifier):
-    expr = AstNode.astify("( x + 0 ) - ( 1 * 7 )")
+    expr = AstNode.astify("(x + 0) - (1 * 7)")
     assert simplifier.apply_all(expr)
     expected_expr = AstNode.astify("x - 7")
     assert expr.is_equal(expected_expr)
-    expr = AstNode.astify("( ( 0 + 0 ) + 0 + ln ( y ) ) / ( y * 0 )")
+    expr = AstNode.astify("((0 + 0) + 0 + ln(y)) / (y * 0)")
     assert simplifier.apply_all(expr)
-    expected_expr = AstNode.astify("ln ( y ) / 0")
+    expected_expr = AstNode.astify("ln(y) / 0")
     assert expr.is_equal(expected_expr)

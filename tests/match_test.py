@@ -16,7 +16,7 @@ patternvariables = patternvariable_init_test
 
 @pytest.fixture
 def test_exprs():
-	expr1 = AstNode.astify("4 + exp ( x - s )")
+	expr1 = AstNode.astify("4 + exp(x - s)")
 	expr2 = AstNode.astify("-18")
 
 def patternvariable_match_test(patternvariables, test_exprs):
@@ -41,5 +41,5 @@ def sub_to_add_test():
 	assert bindings[PatternVariable("f")].value == Variable("x")
 	assert bindings[PatternVariable("g")].value == 2
 	assert normalisation_rules[0].apply_all(expr)
-	expected_expr = AstNode.astify("x + ( -1 * 2 )")
+	expected_expr = AstNode.astify("x + (-1 * 2)")
 	assert expr.is_equal(expected_expr)
