@@ -17,9 +17,14 @@ def tokenify(string: str) -> Token:
         else:
             return Variable(string)
 
+def space_around_string(string: str) -> str:
+    for char in "()+*/":
+        string = string.replace(char, f" {char} ")
+    return string
 
 def string_to_tokens(string: str) -> list[Token]:
     """Converts a string expression into a list of corresponding tokens."""
+    string = space_around_string(string)
     str_tokens = string.split()
     tokens = [tokenify(str_token) for str_token in str_tokens]
     return tokens
