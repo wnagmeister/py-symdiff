@@ -45,6 +45,14 @@ class Flattening(Transformation):
 
 
 class CanonicalOrdering(Transformation):
+    def apply_root(self, expr: AstNode) -> bool:
+        if isinstance(expr.value, Operator) and expr.value.commutative:
+            expr_children_copy = expr.children[:]
+            expr.children.sort(key=self.expr_sort_key)
+            return expr_children_copy != expr.children
+        else:
+            return False
+
     @staticmethod
     def expr_sort_key(expr: AstNode) -> tuple[int, float | str | int]:
         match expr.value:
@@ -54,14 +62,6 @@ class CanonicalOrdering(Transformation):
                 return (1, expr.value.string)
             case _:  # case Operator():
                 return (2, expr.value.precedence)
-
-    def apply_root(self, expr: AstNode) -> bool:
-        if isinstance(expr.value, Operator) and expr.value.commutative:
-            expr_children_copy = expr.children[:]
-            expr.children.sort(key=self.expr_sort_key)
-            return expr_children_copy != expr.children
-        else:
-            return False
 
 
 class Evaluation(Transformation):

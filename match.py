@@ -5,10 +5,11 @@ from typing import cast
 
 
 class PatternVariable(Variable):
-    def __init__(self, string, match_type: None | float = None):
+    def __init__(self, string: str, match_type: None | float = None):
         """If a match type is not given, it is inferred from the string."""
         super().__init__(string)
-        if not match_type:
+        self.match_type = match_type
+        if not self.match_type:
             self.match_type = self.default_match_type(string)
 
     @staticmethod
@@ -100,12 +101,13 @@ class Differentiation(PatternMatching):
     pass
 
 
-normalisation_rules = {
+normalisation_rules = [
     PatternMatching("- to +", AstNode.astify("f - g"), AstNode.astify("f + ( -1 * g )"))
-}
+]
 
-differentiation_rules = {
+differentiation_rules = [
     Differentiation("constant", AstNode.astify("x D s"), AstNode.astify("0")),
+    Differentiation("variable", AstNode.astify("x D x"), AstNode.astify("1")),
     Differentiation(
         "sum rule",
         AstNode.astify("x D ( f + g )"),
@@ -116,7 +118,7 @@ differentiation_rules = {
         AstNode.astify("x D ( f * g )"),
         AstNode.astify("( ( x D f ) * g ) + ( f * ( x D g ) )"),
     ),
-}
+]
 
 if __name__ == "__main__":
     pass
