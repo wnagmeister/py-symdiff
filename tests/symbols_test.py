@@ -14,7 +14,7 @@ def test_operators_dict():
         if i == 0:
             prev_operator = operators[key]
         elif key not in "()sum":
-            assert operators[key] >= prev_operator
+            assert operators[key] >= prev_operator # pyright: ignore
             prev_operator = operators[key]
     assert operators["+"] >= operators["-"]
     assert operators["-"] >= operators["+"]

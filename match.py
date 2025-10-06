@@ -5,24 +5,25 @@ from typing import cast
 
 
 class PatternVariable(Variable):
-    def __init__(self, string: str, match_type: None | float = None):
+    def __init__(self, string: str, match_type: None | type[float] = None):
         """If a match type is not given, it is inferred from the string."""
         super().__init__(string)
-        self.match_type = match_type
-        if not self.match_type:
-            self.match_type = self.default_match_type(string)
+        self.match_type: str | type[float] = self.default_match_type(string, match_type)
 
     @staticmethod
-    def default_match_type(string: str):
-        match string:
-            case "s":
-                return float
-            case _:
-                return "all"
+    def default_match_type(string: str, match_type : None | type[float]):
+        if  match_type:
+            return match_type
+        else:
+            match string:
+                case "s":
+                    return float
+                case _:
+                    return "all"
 
     def match(self, expr: AstNode) -> bool:
         """Returns whether the PatternVariable matches expr at the root."""
-        if self.match_type == "all":
+        if isinstance(self.match_type, str):
             return True
         else:
             return isinstance(expr.value, self.match_type)
@@ -69,9 +70,7 @@ class PatternMatching(Transformation):
                 return expr.value == pattern.value
 
             case PatternVariable():
-                if pattern.value.match_type == "all" or isinstance(
-                    expr.value, pattern.value.match_type
-                ):
+                if pattern.value.match(expr):
                     if existing_binding := bindings.get(pattern.value):
                         return expr.is_equal(existing_binding)
                     else:
@@ -101,7 +100,7 @@ class Differentiation(PatternMatching):
     pass
 
 
-normalisation_rules = [
+normalisation_rules: list[Transformation] = [
     PatternMatching("- to +", AstNode.astify("f - g"), AstNode.astify("f + ( -1 * g )"))
 ]
 

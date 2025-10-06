@@ -7,10 +7,11 @@ from rules import (
     Simplification,
 )
 from match import normalisation_rules, differentiation_rules
+from typing import Sequence
 
 
 class TransformationPipeline:
-    def __init__(self, transformations: list[Transformation]):
+    def __init__(self, transformations: Sequence[Transformation]):
         self.transformations = transformations
 
     def apply_root(self, expr: AstNode):
@@ -35,9 +36,7 @@ class TransformationPipeline:
 
 
 normalisation = TransformationPipeline(
-    normalisation_rules.extend(
-        [Flattening(), CanonicalOrdering(), Evaluation(), Simplification()]
-    )
+        [normalisation_rules[0], Flattening(), CanonicalOrdering(), Evaluation(), Simplification()]
 )
 
 

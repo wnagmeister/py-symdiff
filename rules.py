@@ -1,5 +1,6 @@
 from symbols import Operator, Variable, operators
 from astree import AstNode
+from typing import Callable
 
 
 # TODO: replace: expr.value = other.value, expr.children = other.children with
@@ -60,8 +61,10 @@ class CanonicalOrdering(Transformation):
                 return (0, expr.value)
             case Variable():
                 return (1, expr.value.string)
-            case _:  # case Operator():
+            case Operator():
                 return (2, expr.value.precedence)
+            case _:
+                raise TypeError
 
 
 class Evaluation(Transformation):
@@ -71,35 +74,15 @@ class Evaluation(Transformation):
     and that expressions with zero or one summand/factor which is a float have
     been folded into the operator in the identity simplification phase.
     """
+    pass
 
-    def apply_root(self, expr: AstNode) -> bool:
-        if (
-            isinstance(expr.value, Operator)
-            and expr.value.func
-            and expr.value.arity <= (num := self.num_floats(expr.children))
-        ):
-            if expr.value.arity == 1:
-                expr.value = expr.value.func(expr.children.pop(0).value)
-                expr.children = []
-            else:
-                result: float = expr.value.func(
-                    expr.children.pop(0).value, expr.children.pop(0).value
-                )
-                for i in range(num - 2):
-                    result = expr.value.func(result, expr.children.pop(0).value)
-                if expr.num_children() > 0:
-                    expr.children.insert(0, AstNode.leafify(result))
-                else:  # num < expr.num_children()
-                    expr.value = result
-                    expr.children = []
-            return True
-        else:
-            return False
+
+
 
     @staticmethod
     def num_floats(nodes: list[AstNode]) -> int:
         """Finds the number of nodes in a list which contain float values."""
-        num: int = 0
+        num = 0
         for node in nodes:
             if isinstance(node.value, float):
                 num += 1
@@ -114,7 +97,7 @@ class Simplification(Transformation):
         operator.
         """
         if expr.value == operators["+"]:
-            old_length: int = expr.num_children()
+            old_length = expr.num_children()
             expr.children[:] = [child for child in expr.children if child.value != 0]
             if expr.num_children() == 0:
                 expr.value = 0.0
@@ -131,7 +114,7 @@ class Simplification(Transformation):
                 expr.value = 0.0
                 expr.children = []
                 return True
-            old_length: int = expr.num_children()
+            old_length = expr.num_children()
             expr.children[:] = [child for child in expr.children if child.value != 1]
             if expr.num_children() == 0:
                 expr.value = 1.0

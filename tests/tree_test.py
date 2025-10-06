@@ -1,6 +1,7 @@
 from tree import Node
 import pytest
 
+# pyright: basic
 
 @pytest.fixture
 def SubClass():

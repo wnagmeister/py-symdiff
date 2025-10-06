@@ -1,6 +1,7 @@
 from astree import AstNode
 from match import PatternVariable, PatternMatching, normalisation_rules, differentiation_rules
 import pytest
+from typing import Sequence
 
 @pytest.fixture
 def test_patternvariable_init():
@@ -20,7 +21,7 @@ def test_exprs():
 	expr2 = AstNode.astify("-18")
 	return expr1, expr2
 
-def test_patternvariable_match(patternvariables, test_exprs):
+def test_patternvariable_match(patternvariables: Sequence[PatternVariable], test_exprs: Sequence[AstNode]):
 	for patvar, expr in zip(patternvariables, test_exprs):
 		assert patvar.match(expr)
 	expr1, expr2 = test_exprs

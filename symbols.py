@@ -1,18 +1,16 @@
 import math
+from typing import Callable, Any, Self
 
 
 class Variable:
-    def __init__(self, string):
-        self.string = string
+    def __init__(self, string: str):
+        self.string: str = string
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any):
         if isinstance(other, Variable):
             return self.string == other.string
         else:
             return False
-
-    def evaluate(self, x):
-        return x
 
     def __repr__(self):
         return self.string
@@ -29,16 +27,16 @@ class Operator:
         precedence: int,
         associative: bool | str,
         commutative: bool,
-        func,
+        func: Callable[[float], float] | Callable[[float, float], float] | None
     ):
         self.string = string
         self.arity = arity
         self.precedence = precedence
         self.associative = associative
         self.commutative = commutative
-        self.func = func
+        self.func: Callable[[float], float] | Callable[[float, float], float] | None = func
 
-    def __ge__(self, other) -> bool:
+    def __ge__(self, other: Self):
         return self.precedence >= other.precedence
 
     def __repr__(self):

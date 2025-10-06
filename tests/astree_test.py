@@ -1,7 +1,9 @@
-from tokens import Variable
+from tokens import Variable, Token
 from astree import AstNode
 import pytest
 from tests.tokens_test import test_expressions_full
+
+# pyright: reportUnusedVariable=false
 
 rpn_tokens_asttree = [(rpn, ast) for (infix, rpn, ast, var) in test_expressions_full]
 asttree = [ast for (infix, rpn, ast, var) in test_expressions_full]
@@ -9,12 +11,12 @@ asttree_varis = [(ast, varis) for (infix, rpn, ast, varis) in test_expressions_f
 
 
 @pytest.mark.parametrize("rpn_tokens, asttree", rpn_tokens_asttree)
-def test_astify_rpn(rpn_tokens, asttree):
+def test_astify_rpn(rpn_tokens: list[Token], asttree: AstNode):
     assert AstNode.astify_rpn(rpn_tokens).is_equal(asttree)
 
 
-@pytest.mark.parametrize("asttree", asttree)
-def test_overload_add(asttree):
+# @pytest.mark.parametrize("asttree", asttree)
+def test_overload_add():
     pass
 
 
@@ -32,7 +34,7 @@ def test_overload_pow():
 
 
 @pytest.mark.parametrize("asttree", asttree)
-def test_copy(asttree):
+def test_copy(asttree: AstNode):
     asttree_copy = asttree.copy()
     assert not asttree_copy == asttree
     assert asttree_copy.is_equal(asttree)
@@ -49,5 +51,5 @@ def test_copy(asttree):
 
 
 @pytest.mark.parametrize("asttree, varis", asttree_varis)
-def test_variables(asttree, varis):
+def test_variables(asttree: AstNode, varis: set[Variable]):
     assert asttree.variables() == varis

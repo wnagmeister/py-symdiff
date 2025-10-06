@@ -3,7 +3,7 @@ from astree import AstNode
 
 
 class PatternVariable(Variable):
-    def __init__(self, string, match_type: None | float = None):
+    def __init__(self, string: str, match_type: None | float = None):
         """If a match type is not given, it is inferred from the string."""
         super().__init__(string)
         if not match_type:
@@ -88,13 +88,8 @@ def apply_all_rules(expr: AstNode) -> None:
 
 
 def is_match(
-    expr: AstNode, pattern: AstNode, bindings: dict[Variable, AstNode]
+    expr: AstNode, pattern: AstNode, bindings: dict[PatternVariable, AstNode]
 ) -> bool:
-    """Checks if expr matches the pattern given. All variables in
-    pattern are wildcards which can be bound to any subexpression.
-    Will only return True if the entire expression matches the pattern;
-    it will not match subexpressions of expr to the pattern.
-    """
     match pattern.value:
         case float():
             return expr.value == pattern.value

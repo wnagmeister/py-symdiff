@@ -1,4 +1,4 @@
-from tokens import tokenify, string_to_tokens, shunting_yard
+from tokens import tokenify, string_to_tokens, shunting_yard, Token
 from symbols import Variable, Operator, operators
 from astree import AstNode
 import pytest
@@ -25,7 +25,7 @@ test_expressions_full = [
                         AstNode.leafify(3.0),
                         AstNode(
                             operators["+"],
-                            [AstNode.leafify(Variable("x")), AstNode.leafify(2)],
+                            [AstNode.leafify(Variable("x")), AstNode.leafify(2.0)],
                         ),
                     ],
                 ),
@@ -85,7 +85,7 @@ test_expressions_full = [
     ),
 ]
 
-infix_string_rpn_tokens = [(a, b) for (a, b, c, d) in test_expressions_full]
+infix_string_rpn_tokens = [(a, b) for (a, b, c, d) in test_expressions_full] # pyright: ignore
 
 
 def test_tokenify():
@@ -98,5 +98,5 @@ def test_tokenify():
 
 
 @pytest.mark.parametrize("infix_string, rpn_tokens", infix_string_rpn_tokens)
-def test_shunting_yard(infix_string, rpn_tokens):
+def test_shunting_yard(infix_string: str, rpn_tokens: list[Token]):
     assert shunting_yard(string_to_tokens(infix_string)) == rpn_tokens

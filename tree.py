@@ -1,14 +1,17 @@
-class Node:
+from typing import Generic, Self, TypeVar, Callable, Generator
+
+T = TypeVar("T")
+class Node(Generic[T]):
     """Generic (arbitrary number of children) tree data structure."""
 
     nodewidth = 5
 
-    def __init__(self, value, children: list):
+    def __init__(self, value: T, children: list[Self]):
         self.value = value
         self.children = children
 
     @classmethod
-    def leafify(cls, value):
+    def leafify(cls, value: T):
         """Returns a leaf node with value value and no children."""
         return cls(value, [])
 
@@ -26,7 +29,7 @@ class Node:
     def num_children(self) -> int:
         return len(self.children)
 
-    def is_equal(self, other: "Node", compare=lambda x, y: x == y) -> bool:
+    def is_equal(self, other: Self, compare: Callable[[T, T], bool]=lambda x, y: x == y) -> bool:
         """Compares two trees for equality. Two node values are equal if the
         given compare function (default __eq__) for node values agrees."""
         if self.is_leaf() ^ other.is_leaf():
@@ -41,12 +44,12 @@ class Node:
                     return False
             return True
 
-    def substitute(self, child: "Node", replacement: "Node") -> None:
+    def substitute(self, child: Self, replacement: Self) -> None:
         for i, each_child in enumerate(self.children):
             if each_child == child:
                 self.children[i] = replacement
 
-    def traverse(self):
+    def traverse(self) -> Generator[Self]:
         """Traverses over the subnodes in post-order."""
         for child in self.children:
             yield from child.traverse()
@@ -73,7 +76,7 @@ class Node:
         if self.is_leaf():
             return Node.make_branch(repr(self.value))
 
-        lst = []
+        lst: list[str] = []
         for i, child in enumerate(self.children):
             if i == self.num_children() // 2:
                 lst.append(Node.make_branch(repr(self.value)))
