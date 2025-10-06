@@ -85,7 +85,7 @@ test_expressions_full = [
     ),
 ]
 
-infix_string_rpn_tokens = [(a, b) for (a, b, c, d) in test_expressions_full] # pyright: ignore
+infix_string_rpn_tokens = [(a, b) for (a, b, c, d) in test_expressions_full]  # pyright: ignore
 
 
 def test_tokenify():

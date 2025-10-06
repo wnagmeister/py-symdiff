@@ -69,9 +69,6 @@ class AstNode(Node[Token]):
                 return cls(self.value, [child.copy() for child in self.children])
             case _:
                 raise TypeError
-    
-    
-
 
     def variables(self) -> set[Variable]:
         variables: set[Variable] = set()
@@ -82,7 +79,9 @@ class AstNode(Node[Token]):
 
     def substitute_variables(self, substitutions: dict[Variable, "AstNode"]) -> None:
         for node in self:
-            if isinstance(node.value, Variable) and (substitution := substitutions.get(node.value)):
+            if isinstance(node.value, Variable) and (
+                substitution := substitutions.get(node.value)
+            ):
                 node.value = substitution.value
                 node.children = substitution.children
 

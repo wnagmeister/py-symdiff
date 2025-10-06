@@ -36,7 +36,13 @@ class TransformationPipeline:
 
 
 normalisation = TransformationPipeline(
-        [normalisation_rules[0], Flattening(), CanonicalOrdering(), Evaluation(), Simplification()]
+    [
+        normalisation_rules[0],
+        Flattening(),
+        CanonicalOrdering(),
+        Evaluation(),
+        Simplification(),
+    ]
 )
 
 

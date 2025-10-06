@@ -1,6 +1,8 @@
 from typing import Generic, Self, TypeVar, Callable, Generator
 
 T = TypeVar("T")
+
+
 class Node(Generic[T]):
     """Generic (arbitrary number of children) tree data structure."""
 
@@ -29,7 +31,9 @@ class Node(Generic[T]):
     def num_children(self) -> int:
         return len(self.children)
 
-    def is_equal(self, other: Self, compare: Callable[[T, T], bool]=lambda x, y: x == y) -> bool:
+    def is_equal(
+        self, other: Self, compare: Callable[[T, T], bool] = lambda x, y: x == y
+    ) -> bool:
         """Compares two trees for equality. Two node values are equal if the
         given compare function (default __eq__) for node values agrees."""
         if self.is_leaf() ^ other.is_leaf():

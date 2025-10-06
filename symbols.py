@@ -27,14 +27,16 @@ class Operator:
         precedence: int,
         associative: bool | str,
         commutative: bool,
-        func: Callable[[float], float] | Callable[[float, float], float] | None
+        func: Callable[[float], float] | Callable[[float, float], float] | None,
     ):
         self.string = string
         self.arity = arity
         self.precedence = precedence
         self.associative = associative
         self.commutative = commutative
-        self.func: Callable[[float], float] | Callable[[float, float], float] | None = func
+        self.func: Callable[[float], float] | Callable[[float, float], float] | None = (
+            func
+        )
 
     def __ge__(self, other: Self):
         return self.precedence >= other.precedence

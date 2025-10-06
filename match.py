@@ -11,8 +11,8 @@ class PatternVariable(Variable):
         self.match_type: str | type[float] = self.default_match_type(string, match_type)
 
     @staticmethod
-    def default_match_type(string: str, match_type : None | type[float]):
-        if  match_type:
+    def default_match_type(string: str, match_type: None | type[float]):
+        if match_type:
             return match_type
         else:
             match string:

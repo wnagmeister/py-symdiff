@@ -74,10 +74,8 @@ class Evaluation(Transformation):
     and that expressions with zero or one summand/factor which is a float have
     been folded into the operator in the identity simplification phase.
     """
+
     pass
-
-
-
 
     @staticmethod
     def num_floats(nodes: list[AstNode]) -> int:

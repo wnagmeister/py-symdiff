@@ -3,6 +3,7 @@ import pytest
 
 # pyright: basic
 
+
 @pytest.fixture
 def SubClass():
     class SubNode(Node):
