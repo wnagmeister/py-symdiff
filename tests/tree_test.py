@@ -70,15 +70,6 @@ def test_is_equal():
     assert tree1.is_equal(tree2, lambda x, y: True)
 
 
-def test_substitute(test_tree):
-    node8 = Node.leafify(8)
-    node4 = test_tree.children[0]
-    test_tree.substitute(test_tree.children[0], node8)
-    assert test_tree.children[0] is node8
-    assert test_tree.children[1].value == 6
-    assert node4.value == 4
-
-
 def test_iter(test_tree):
     num = 0
     for i, node in enumerate(test_tree):

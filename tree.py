@@ -48,11 +48,6 @@ class Node(Generic[T]):
                     return False
             return True
 
-    def substitute(self, child: Self, replacement: Self) -> None:
-        for i, each_child in enumerate(self.children):
-            if each_child == child:
-                self.children[i] = replacement
-
     def traverse(self) -> Generator[Self]:
         """Traverses over the subnodes in post-order."""
         for child in self.children:
