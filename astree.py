@@ -64,7 +64,7 @@ class AstNode(Node[Token]):
             case float():
                 return cls.leafify(self.value)
             case Variable():
-                return cls.leafify(Variable(self.value.string))
+                return cls.leafify(self.value.__class__(self.value.string))
             case Operator():
                 return cls(self.value, [child.copy() for child in self.children])
             case _:

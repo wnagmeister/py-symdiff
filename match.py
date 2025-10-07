@@ -100,7 +100,7 @@ class Differentiation(PatternMatching):
     pass
 
 
-normalisation_rules: list[Transformation] = [
+normalisation_rules: list[PatternMatching] = [
     PatternMatching("- to +", AstNode.astify("f - g"), AstNode.astify("f + ( -1 * g )"))
 ]
 

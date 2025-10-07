@@ -1,6 +1,5 @@
-from symbols import Operator, Variable, operators
+from symbols import BinaryOperator, Operator, UnaryOperator, Variable, operators
 from astree import AstNode
-from typing import Callable
 
 
 # TODO: replace: expr.value = other.value, expr.children = other.children with
@@ -75,16 +74,55 @@ class Evaluation(Transformation):
     been folded into the operator in the identity simplification phase.
     """
 
-    pass
+    def apply_root(self, expr: AstNode):
+        match expr.value:
+            case UnaryOperator():
+                if isinstance(expr.children[0].value, float):
+                    expr.value = expr.value.func(expr.children[0].value)
+                    expr.children = []
+                    return True
+            case BinaryOperator():
+                if (num := self.num_floats(expr.children)) >= 2:
+                    floats: list[float] = [
+                        child.value
+                        for child in expr.children
+                        if isinstance(child.value, float)
+                    ]
+                    non_floats: list[AstNode] = [
+                        child
+                        for child in expr.children
+                        if not isinstance(child.value, float)
+                    ]
+
+                    result: float = expr.value.func(floats[0], floats[1])
+                    for i in range(2, num):
+                        result = expr.value.func(result, floats[i])
+
+                    if non_floats == []:
+                        expr.value = result
+                        expr.children = []
+                    else:
+                        expr.children.insert(0, AstNode.leafify(result))
+
+                    return True
+
+                pass
+            case _:
+                pass
+        return False
 
     @staticmethod
     def num_floats(nodes: list[AstNode]) -> int:
         """Finds the number of nodes in a list which contain float values."""
-        num = 0
-        for node in nodes:
-            if isinstance(node.value, float):
-                num += 1
-        return num
+        # num = 0
+        # for node in nodes:
+        #     if isinstance(node.value, float):
+        #         num += 1
+        # return num
+        for i in range(len(nodes)):
+            if not isinstance(nodes[i].value, float):
+                return i
+        return len(nodes)
 
 
 class Simplification(Transformation):
