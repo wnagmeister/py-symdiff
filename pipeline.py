@@ -1,30 +1,42 @@
-from astree import AstNode
-from rules import (
-    Transformation,
-    Flattening,
-    CanonicalOrdering,
-    Evaluation,
-    Simplification,
-)
-from match import normalisation_rules, differentiation_rules
 from typing import Sequence
 
+from astree import AstNode
+from match import differentiation_rules, normalisation_rules
+from rules import (
+    CanonicalOrdering,
+    Evaluation,
+    Flattening,
+    UnFlattening,
+    Simplification,
+    Transformation,
+)
 
-class TransformationPipeline:
+
+class TransformationGroup:
     def __init__(self, transformations: Sequence[Transformation]):
         self.transformations = transformations
 
-    def apply_root(self, expr: AstNode):
+    def apply_root(self, expr: AstNode) -> bool:
+        has_changed = False
         while True:
             changed: bool = False
             for transformation in self.transformations:
                 changed = transformation.apply_root(expr) or changed
+            has_changed |= changed
             if not changed:
                 break
+        return has_changed
 
-    def apply(self, expr: AstNode):
-        for sub_expr in expr:
-            self.apply_root(sub_expr)
+    def apply_all(self, expr: AstNode) -> bool:
+        has_changed = False
+        while True:
+            changed: bool = False
+            for sub_expr in expr:
+                changed = self.apply_root(sub_expr) or changed
+            has_changed |= changed
+            if not changed:
+                break
+        return has_changed
 
     def apply2(self, expr: AstNode):
         while True:
@@ -34,8 +46,17 @@ class TransformationPipeline:
             if not changed:
                 break
 
+class TransformationPipeline:
+    def __init__(self, steps: list[Transformation | TransformationGroup]):
+        self.steps = steps
 
-normalisation = TransformationPipeline(
+    def apply_all(self, expr: AstNode):
+        for step in self.steps:
+            step.apply_all(expr)
+            print("step done")
+
+
+normalisation_group = TransformationGroup(
     [
         normalisation_rules[0],
         Flattening(),
@@ -45,5 +66,10 @@ normalisation = TransformationPipeline(
     ]
 )
 
+differentiation_group = TransformationGroup(differentiation_rules)
 
-differentiation = TransformationPipeline(differentiation_rules)
+differentiation_pipeline = TransformationPipeline([
+    UnFlattening(),
+    differentiation_group,
+    normalisation_group
+    ])

@@ -1,14 +1,26 @@
-from symbols import Variable
-from astree import AstNode
-from rules import Flattening, CanonicalOrdering, Evaluation, Simplification
 import pytest
-import math
+
+from astree import AstNode
+from rules import (
+    CanonicalOrdering,
+    Evaluation,
+    Flattening,
+    Simplification,
+    UnFlattening,
+)
+from symbols import Variable
 
 
 @pytest.fixture
 def flattener():
     flatterner = Flattening()
     return flatterner
+
+
+@pytest.fixture
+def unflattener():
+    unflattener = UnFlattening()
+    return unflattener
 
 
 @pytest.fixture
@@ -35,6 +47,11 @@ def test_flattening(flattener: Flattening):
     assert expr.children[1].children[0].value == 2
     assert expr.children[1].children[1].value == Variable("x")
     assert expr.children[1].children[2].value == -4
+
+def test_unflattening(flattener: Flattening, unflattener: UnFlattening):
+    expr = AstNode.astify("y * ((2 + x +  t) + -4)")
+    flattener.apply_all(expr)
+    assert unflattener.apply_all(expr)
 
 
 def test_canonicalordering(flattener: Flattening, canonical_orderer: CanonicalOrdering):
@@ -72,4 +89,8 @@ def test_simplification(simplifier: Simplification):
     expr = AstNode.astify("((0 + 0) + 0 + ln(y)) / (y * 0)")
     assert simplifier.apply_all(expr)
     expected_expr = AstNode.astify("ln(y) / 0")
+    assert expr.is_equal(expected_expr)
+    expr = AstNode.astify("1 + a")
+    expected_expr = expr.copy()
+    assert not simplifier.apply_all(expr)
     assert expr.is_equal(expected_expr)

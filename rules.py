@@ -1,6 +1,5 @@
-from symbols import BinaryOperator, Operator, UnaryOperator, Variable, operators
 from astree import AstNode
-
+from symbols import BinaryOperator, Operator, UnaryOperator, Variable, operators
 
 # TODO: replace: expr.value = other.value, expr.children = other.children with
 # a unified susbtitution mechanism which does not erase expr.
@@ -41,6 +40,27 @@ class Flattening(Transformation):
                 else:
                     new_children.append(sub_expr)
             expr.children = new_children
+        return applied
+
+
+class UnFlattening(Transformation):
+    def apply_root(self, expr: AstNode) -> bool:
+        if (
+            isinstance(expr.value, Operator)
+            and expr.value.associative == "full"
+            and expr.num_children() > 2
+        ):
+            new_list = [expr.children.pop() for _ in range(expr.num_children() - 1)]
+            new_child = AstNode(expr.value, new_list)
+            expr.children.append(new_child)
+            return True
+        return False
+
+    def apply_all(self, expr: AstNode) -> bool:
+        applied = False
+        applied |= self.apply_root(expr)
+        for child in expr.children:
+            applied |= self.apply_all(child)
         return applied
 
 
@@ -143,7 +163,7 @@ class Simplification(Transformation):
                 expr.children = expr.children[0].children
                 return True
             else:
-                return old_length == expr.num_children()
+                return old_length != expr.num_children()
 
         elif expr.value == operators["*"]:
             if 0.0 in [child.value for child in expr.children]:
@@ -160,7 +180,7 @@ class Simplification(Transformation):
                 expr.children = expr.children[0].children
                 return True
             else:
-                return old_length == expr.num_children()
+                return old_length != expr.num_children()
         return False
 
 
