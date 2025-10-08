@@ -1,18 +1,26 @@
+import pytest
+
 from astree import AstNode
-from pipeline import normalisation_group, differentiation_pipeline
+from pipeline import (
+    differentiation_group,
+    differentiation_pipeline,
+    normalisation_group,
+)
 
+"""
+        normalisation_rules[0],
+        Flattening(),
+        CanonicalOrdering(),
+        Evaluation(),
+        Simplification(),
+"""
 
-def test_norm_mult():
-    expr = AstNode.astify("x D (x * x)")
-    normalisation_group.apply_all(expr)
+@pytest.fixture
+def test_expr():
+    return AstNode.astify("(3 + ((x - 2) + 5)) * (1 * -4)")
 
-def test_diff_mult():
-    expr = AstNode.astify("x D (x * x)")
-    differentiation_pipeline.apply_all(expr)
+def test_normalisation_group(test_expr: AstNode):
+    normalisation_group.apply_all(test_expr)
+    expected_expr = AstNode.astify("-4 * (6 + x)")
+    assert test_expr.is_equal(expected_expr)
 
-
-# def test_diff_add():
-#     expr = AstNode.astify("x D (x + x)")
-#     breakpoint()
-#     differentiation_pipeline.apply_all(expr)
-#     breakpoint()

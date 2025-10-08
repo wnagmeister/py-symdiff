@@ -53,7 +53,6 @@ class TransformationPipeline:
     def apply_all(self, expr: AstNode):
         for step in self.steps:
             step.apply_all(expr)
-            print("step done")
 
 
 normalisation_group = TransformationGroup(
