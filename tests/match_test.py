@@ -3,7 +3,7 @@ from symbols import Variable
 from match import (
     PatternVariable,
     PatternMatching,
-    normalisation_rules,
+    normalisation_patterns,
     differentiation_rules,
 )
 import pytest
@@ -49,14 +49,14 @@ def test_patternvariable_match(
 
 
 def test_sub_to_add():
-    pattern: AstNode = normalisation_rules[0].pattern
+    pattern: AstNode = normalisation_patterns[0].pattern
     expr: AstNode = AstNode.astify("x - 2")
     bindings: dict[PatternVariable, AstNode] = {}
     assert PatternMatching.match(expr, pattern, bindings)
     assert isinstance(bindings[PatternVariable("f")].value, Variable)
     assert bindings[PatternVariable("f")].value.string == "x"
     assert bindings[PatternVariable("g")].value == 2
-    assert normalisation_rules[0].apply_all(expr)
+    assert normalisation_patterns[0].apply_all(expr)
     expected_expr = AstNode.astify("x + (-1 * 2)")
     assert expr.is_equal(expected_expr)
 

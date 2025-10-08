@@ -1,7 +1,7 @@
 from typing import Sequence
 
 from astree import AstNode
-from match import differentiation_rules, normalisation_rules
+from match import differentiation_rules, normalisation_patterns
 from rules import (
     CanonicalOrdering,
     Evaluation,
@@ -56,8 +56,8 @@ class TransformationPipeline:
 
 
 normalisation_group = TransformationGroup(
+        normalisation_patterns +
     [
-        normalisation_rules[0],
         Flattening(),
         CanonicalOrdering(),
         Evaluation(),

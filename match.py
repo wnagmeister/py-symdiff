@@ -1,7 +1,8 @@
-from symbols import Variable, Operator
+from typing import cast
+
 from astree import AstNode
 from rules import Transformation
-from typing import cast
+from symbols import Operator, Variable
 
 
 class PatternVariable(Variable):
@@ -100,8 +101,11 @@ class Differentiation(PatternMatching):
     pass
 
 
-normalisation_rules: list[PatternMatching] = [
-    PatternMatching("- to +", AstNode.astify("f - g"), AstNode.astify("f + ( -1 * g )"))
+normalisation_patterns: list[PatternMatching] = [
+    PatternMatching(
+        "- to +", AstNode.astify("f - g"), AstNode.astify("f + ( -1 * g )")
+    ),
+    PatternMatching("/ to *", AstNode.astify("f / g"), AstNode.astify("f * g ^ -1")),
 ]
 
 differentiation_rules = [
@@ -116,6 +120,11 @@ differentiation_rules = [
         "product rule",
         AstNode.astify("x D ( f * g )"),
         AstNode.astify("( ( x D f ) * g ) + ( f * ( x D g ) )"),
+    ),
+    Differentiation(
+        "power rule",
+        AstNode.astify("x D (f ^ s)"),
+        AstNode.astify("s * f ^ (s - 1) * x D f"),
     ),
     Differentiation(
         "exponential rule",
