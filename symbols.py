@@ -1,5 +1,5 @@
 import math
-from typing import Callable, Any, Self
+from typing import Any, Callable, Self
 
 
 class Symbol:

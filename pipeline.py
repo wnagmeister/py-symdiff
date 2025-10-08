@@ -6,9 +6,9 @@ from rules import (
     CanonicalOrdering,
     Evaluation,
     Flattening,
-    UnFlattening,
     Simplification,
     Transformation,
+    UnFlattening,
 )
 
 

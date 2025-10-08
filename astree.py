@@ -1,7 +1,8 @@
-from tree import Node
-from symbols import Variable, Operator, operators
-from tokens import string_to_tokens, Token, shunting_yard
 from typing import Self
+
+from symbols import Operator, Variable, operators
+from tokens import Token, shunting_yard, string_to_tokens
+from tree import Node
 
 
 class AstNode(Node[Token]):

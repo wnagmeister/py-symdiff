@@ -1,5 +1,4 @@
-from symbols import Variable, Operator, operators
-
+from symbols import Operator, Variable, operators
 
 type Token = float | Operator | Variable
 type Operand = float | Variable
