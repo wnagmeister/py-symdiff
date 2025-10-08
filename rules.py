@@ -101,6 +101,7 @@ class Evaluation(Transformation):
                     expr.value = expr.value.func(expr.children[0].value)
                     expr.children = []
                     return True
+
             case BinaryOperator():
                 if (num := self.num_floats(expr.children)) >= 2:
                     floats: list[float] = [
@@ -122,11 +123,9 @@ class Evaluation(Transformation):
                         expr.value = result
                         expr.children = []
                     else:
-                        expr.children.insert(0, AstNode.leafify(result))
+                        expr.children = [AstNode.leafify(result)] + non_floats
 
                     return True
-
-                pass
             case _:
                 pass
         return False
