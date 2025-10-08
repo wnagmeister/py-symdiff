@@ -117,6 +117,21 @@ differentiation_rules = [
         AstNode.astify("x D ( f * g )"),
         AstNode.astify("( ( x D f ) * g ) + ( f * ( x D g ) )"),
     ),
+    Differentiation(
+        "exponential rule",
+        AstNode.astify("x D exp(f)"),
+        AstNode.astify("exp(f) * (x D f)"),
+    ),
+    Differentiation(
+        "sine rule",
+        AstNode.astify("x D sin(f)"),
+        AstNode.astify("cos(f) * (x D f)"),
+    ),
+    Differentiation(
+        "cosine rule",
+        AstNode.astify("x D cos(f)"),
+        AstNode.astify("-1 * sin(f) * (x D f)"),
+    ),
 ]
 
 if __name__ == "__main__":
